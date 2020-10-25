@@ -1,11 +1,11 @@
-# Synthboard - SDL-Sound
+# Synthboard
 SDL-Sound is an ongoing project exploring sound with SDL, and ways to play it at runtime.
-This particular branch explores sound creation with a piano hooked up to some synthesizers, and your keyboard.
+This implementation of SDL-Sound uses the synthesizer pipeline to create music like how a piano would, and is controlled by your keyboard for real-time playback.
 
 ![Synthboard](https://cdn.discordapp.com/attachments/364021339486421004/736567447129423912/Synthboard.png)
 
 ## How to compile Synthboard
-SDL-Sound, and Synthboard, are both written as standard Visual Studio projects that can be compiled and ran.
+SDL-Sound, and Synthboard, are both written as standard C++ Visual Studio projects that can be compiled and ran.
 However, the libraries for SDL2, and SDL2_image, are required for compilation. You can get SDL2 and SDL2_image from the following links,
 and then simply copy them into the project directory to the folders called SDL2, and SDL2_image. Make sure to download the **development libraries** for both.
 - SDL2: https://www.libsdl.org/download-2.0.php
