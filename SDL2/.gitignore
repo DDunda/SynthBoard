@@ -1,4 +1,4 @@
-*
+/**
 !.gitignore
-!include
-!lib
+!include/**
+!lib/**

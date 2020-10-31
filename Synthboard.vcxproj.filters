@@ -169,9 +169,6 @@
     <CopyFileToFolders Include="Nums.png">
       <Filter>Resource Files</Filter>
     </CopyFileToFolders>
-    <CopyFileToFolders Include="Melody1.prm">
-      <Filter>Resource Files</Filter>
-    </CopyFileToFolders>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="SDL2\include\SDL_vulkan.h">
@@ -447,9 +444,6 @@
     <ClInclude Include="Keyboard.h">
       <Filter>Headers</Filter>
     </ClInclude>
-    <ClInclude Include="PianoRoll.h">
-      <Filter>Headers</Filter>
-    </ClInclude>
     <ClInclude Include="RenderableElement.h">
       <Filter>Headers</Filter>
     </ClInclude>
@@ -475,7 +469,7 @@
     </Image>
   </ItemGroup>
   <ItemGroup>
-    <ResourceCompile Include="SDL Sound.rc">
+    <ResourceCompile Include="Synthboard.rc">
       <Filter>Resource Files</Filter>
     </ResourceCompile>
   </ItemGroup>

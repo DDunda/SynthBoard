@@ -22,7 +22,7 @@
     <VCProjectVersion>16.0</VCProjectVersion>
     <ProjectGuid>{97451D32-9697-4664-8DA8-1E22661CAD13}</ProjectGuid>
     <Keyword>Win32Proj</Keyword>
-    <RootNamespace>SDLSound</RootNamespace>
+    <RootNamespace>Synthboard</RootNamespace>
     <WindowsTargetPlatformVersion>10.0</WindowsTargetPlatformVersion>
   </PropertyGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.Default.props" />
@@ -176,7 +176,6 @@
     <ClInclude Include="InteractiveElement.h" />
     <ClInclude Include="IntField.h" />
     <ClInclude Include="Keyboard.h" />
-    <ClInclude Include="PianoRoll.h" />
     <ClInclude Include="RenderableElement.h" />
     <ClInclude Include="resource.h" />
     <ClInclude Include="SDL2\include\begin_code.h" />
@@ -266,15 +265,6 @@
     <ClInclude Include="SimpleButton.h" />
     <ClInclude Include="Sound.h" />
     <ClInclude Include="TextField.h" />
-  </ItemGroup>
-  <ItemGroup>
-    <CopyFileToFolders Include="Melody1.prm">
-      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">false</ExcludedFromBuild>
-      <DeploymentContent Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">true</DeploymentContent>
-      <FileType>Document</FileType>
-      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Release|x64'">false</ExcludedFromBuild>
-      <DeploymentContent Condition="'$(Configuration)|$(Platform)'=='Release|x64'">true</DeploymentContent>
-    </CopyFileToFolders>
   </ItemGroup>
   <ItemGroup>
     <CopyFileToFolders Include="SDL2\lib\x64\SDL2.dll">
@@ -681,7 +671,7 @@
     </Image>
   </ItemGroup>
   <ItemGroup>
-    <ResourceCompile Include="SDL Sound.rc" />
+    <ResourceCompile Include="Synthboard.rc" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">
