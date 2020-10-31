@@ -50,3 +50,11 @@ void DrawRectWithBorder(SDL_Renderer* renderer, SDL_Rect area, int t, SDL_Colour
 	SDL_SetRenderDrawColor(renderer, inner.r, inner.g, inner.b, inner.a);
 	SDL_RenderFillRect(renderer, &innerArea);
 }
+
+const SDL_Rect Keyboard::BlackInactive = {0,0,9,40};
+const SDL_Rect Keyboard::BlackActive = {9,0,9,40};
+const SDL_Rect Keyboard::WhiteInactive = {18,0,16,68};
+const SDL_Rect Keyboard::WhiteActive = {34,0,16,68};
+const SDL_Rect Keyboard::Background = {50,0,1,68};
+
+const SDL_Point Keyboard::PianoSize = {356,68};

@@ -1,5 +1,6 @@
 #pragma once
 #include<SDL.h>
+#include<SDL_image.h>
 
 #include "Input.h"
 #include "Sound.h"
@@ -76,31 +77,30 @@ class Keyboard : public Source<float>, public RenderableElement {
 protected:
 	int numOctaves = 3;
 
+	const static SDL_Rect BlackInactive;
+	const static SDL_Rect BlackActive;
+	const static SDL_Rect WhiteInactive;
+	const static SDL_Rect WhiteActive;
+	const static SDL_Rect Background;
+
+	const static SDL_Point PianoSize;
+
 	SDL_Rect CalculateBlackArea(int n) {
-		int w_left = renderArea.w * n / (numOctaves * 7);
-		int w_right = renderArea.w * (n + 1) / (numOctaves * 7);
+		int x = renderArea.x + (17 * n + 13) * pianoScale;
+		int y = renderArea.y;
 
-		int w_w = w_right - w_left;
-		int w_h = renderArea.h;
-		int w_x = renderArea.x + w_left;
-		int w_y = renderArea.y;
+		int w = 7 * pianoScale;
+		int h = 40 * pianoScale;
 
-		int b_w = w_w / 2;
-		int b_h = w_h / 2;
-		int b_x = w_x + w_w * 3 / 4;
-		int b_y = w_y;
-
-		return { b_x,b_y,b_w,b_h };
+		return { x,y,w,h };
 	}
 
 	SDL_Rect CalculateWhiteArea(int n) {
-		int left = renderArea.w * n / (numOctaves * 7);
-		int right = renderArea.w * (n + 1) / (numOctaves * 7);
-
-		int w = right - left;
-		int h = renderArea.h;
-		int x = left;
+		int x = renderArea.x + 17 * n * pianoScale;
 		int y = renderArea.y;
+
+		int w = 16 * pianoScale;
+		int h = 68 * pianoScale;
 		return { x,y,w,h };
 	}
 
@@ -179,10 +179,23 @@ public:
 	int selectedSynth = 0;
 
 	int borderThickness = 5;
+
+	SDL_Texture* keyTexture = NULL;
+
+	int pianoScale = 4;
 	
 	void update() {
 		TryCall(OnUpdate);
-		renderArea = { 0,screenHeight / 2, screenWidth, screenHeight / 2 };
+
+		pianoScale = floor(screenWidth / 356);
+
+		renderArea = {
+			(screenWidth - PianoSize.x * pianoScale) / 2,
+			screenHeight - PianoSize.y * pianoScale,
+			PianoSize.x * pianoScale,
+			PianoSize.y * pianoScale
+		};
+
 		waveformDrawArea = { 0,0,screenWidth, screenHeight / 2 };
 
 		if (keyPressed(SDLK_LEFT)) {
@@ -250,11 +263,66 @@ public:
 		}
 	};
 	void render(SDL_Renderer* r) {
+		if (keyTexture == NULL)	keyTexture = IMG_LoadTexture(r, "keys.png");
+
 		TryCall(OnRender);
 
-		borderThickness = renderArea.w / ((long long)numOctaves * 7 * 10);
+		//borderThickness = renderArea.w / ((long long)numOctaves * 7 * 10);
+
+		SDL_SetRenderDrawColor(r, 51, 51, 86, 255);
+		SDL_Rect bannerDst{
+			0,
+			screenHeight - PianoSize.y * pianoScale,
+			screenWidth,
+			PianoSize.y * pianoScale
+		};
+		SDL_RenderFillRect(r, &bannerDst);
+
+		SDL_RenderCopy(r, keyTexture, &Background, &renderArea);
+
+		SDL_Rect src;
+		SDL_Rect dst;
 
 		int whiteNum = 0;
+		for (auto key : keys) {
+			if (key->white) {
+				dst = {
+					renderArea.x + whiteNum * 17 * pianoScale,
+					renderArea.y,
+					16 * pianoScale,
+					68 * pianoScale
+				};
+
+				if (key->active) src = WhiteActive;
+				else src = WhiteInactive;
+
+				SDL_RenderCopy(r, keyTexture, &src, &dst);
+
+				whiteNum++;
+			}
+		}
+
+		int blackNum = 0;
+		for (auto key : keys) {
+			if (!key->white) {
+				dst = {
+					renderArea.x + (blackNum * 17 + 12) * pianoScale,
+					renderArea.y,
+					 9 * pianoScale,
+					40 * pianoScale
+				};
+
+				if (key->active) src = BlackActive;
+				else src = BlackInactive;
+
+				SDL_RenderCopy(r, keyTexture, &src, &dst);
+
+				blackNum++;
+				if ((blackNum % 7) == 2 || (blackNum % 7) == 6) blackNum++;
+			}
+		}
+
+		/*int whiteNum = 0;
 		for (auto key : keys) {
 			if (key->white) {
 				renderWhite(r, key->active, key->area);
@@ -270,7 +338,7 @@ public:
 				blackNum++;
 				if ((blackNum % 7) == 2 || (blackNum % 7) == 6) blackNum++;
 			}
-		}
+		}*/
 	};
 
 	Keyboard() {
@@ -282,6 +350,10 @@ public:
 		}
 
 		echo = new EchoFilter(adder, 0.25, new fVal(0.25));
+	}
+
+	~Keyboard() {
+
 	}
 
 	float Get() {
