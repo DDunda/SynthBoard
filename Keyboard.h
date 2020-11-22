@@ -6,6 +6,7 @@
 #include "Sound.h"
 #include "AbstractedAccess.h"
 #include "RenderableElement.h"
+#include "Slider.h"
 
 extern SDL_Rect waveformDrawArea;
 
@@ -171,6 +172,9 @@ protected:
 			}
 		}
 	}
+
+	EasyPointer<Slider> durSlider;
+	EasyPointer<Slider> decSlider;
 
 public:
 	SDL_Rect renderArea;
@@ -349,7 +353,21 @@ public:
 			adder->addSource(MakeKey(firstOctave + i / 12, i % 12, KeyMapping[i]));
 		}
 
-		echo = new EchoFilter(adder, 0.25, new fVal(0.25));
+		decSlider = new Slider(0, 1, 0.25);
+		decSlider->setPosition(25, 107);
+		decSlider->setSliderWidth(100);
+		decSlider->setKnobRadius(5);
+		decSlider->setAnchor(0, 0);
+		decSlider->setPadding({ 8,10,8,10 });
+
+		durSlider = new Slider(0, 1, 0.25);
+		durSlider->setPosition(25, 147);
+		durSlider->setSliderWidth(100);
+		durSlider->setKnobRadius(5);
+		durSlider->setAnchor(0, 0);
+		durSlider->setPadding({ 8,10,8,10 });
+
+		echo = new EchoFilter(adder, durSlider, decSlider);
 	}
 
 	~Keyboard() {

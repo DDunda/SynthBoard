@@ -485,13 +485,16 @@ public:
 
 class EchoFilter : public filter {
 protected:
-	float* bufferStart;
-	float* bufferEnd;
-	float* bufferHead;
+	float* bufferStart = NULL;
+	float* bufferEnd = NULL;
+	float* bufferHead = NULL;
+	int len = 0;
 	Pipe<float> decayRate;
+	Pipe<float> echoDuration;
+	void SetLen(int l);
 
 public:
-	EchoFilter(Pipe<float> src, float duration, Pipe<float> decay);
+	EchoFilter(Pipe<float> src, Pipe<float> duration, Pipe<float> decay);
 	~EchoFilter();
 	float getSound();
 };

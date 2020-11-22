@@ -289,12 +289,8 @@ void HighPassFilter::SetCutoff(float cutoff) {
 	alpha = RC / (RC + dt);
 }
 
-EchoFilter::EchoFilter(Pipe<float> src, float duration, Pipe<float> decay) : filter(src) {
-	unsigned len = duration * SOUND_FREQUENCY;
-	bufferStart = new float[len];
-	for (int i = 0; i < len; i++) bufferStart[i] = 0;
-	bufferEnd = bufferStart + len;
-	bufferHead = bufferStart;
+EchoFilter::EchoFilter(Pipe<float> src, Pipe<float> duration, Pipe<float> decay) : filter(src), echoDuration(duration) {
+	SetLen(floor(duration->Get() * SOUND_FREQUENCY));
 	decayRate = decay;
 }
 
@@ -303,8 +299,77 @@ EchoFilter::~EchoFilter() {
 }
 
 float EchoFilter::getSound() {
-	float sound = source->Get() + *bufferHead * decayRate->Get();
-	*bufferHead = sound;
-	if (++bufferHead == bufferEnd) bufferHead = bufferStart;
+	int l = floor(echoDuration->Get() * SOUND_FREQUENCY);
+	if(l != len) SetLen(l);
+	float d = decayRate->Get();
+	float sound = source->Get();
+	if (bufferHead) {
+		*bufferHead = sound += *bufferHead * d;
+		if (++bufferHead == bufferEnd) bufferHead = bufferStart;
+	}
 	return sound;
+}
+
+void EchoFilter::SetLen(int l) {
+	float* buffer = NULL;
+	if (l != 0) {
+		buffer = new float[l];
+		for (int i = 0; i < l; i++) buffer[i] = 0.0f;
+	}
+	if (bufferStart != NULL) {
+		if (l < len) {
+			int tl = ceil(l / 2.0f);
+			int rl = floor(l / 2.0f);
+
+			float* h1 = bufferHead;
+			float* h2 = buffer;
+
+			for (int i = 0; i < rl; i++) {
+				if (h1 == bufferEnd) h1 = bufferStart;
+				*h2 = *h1;
+				h1++;
+				h2++;
+			}
+
+			h1 = bufferHead - 1;
+			h2 = buffer + l - 1;
+
+			for (int i = 0; i < tl; i++) {
+				if (h1 == bufferStart - 1) h1 = bufferEnd - 1;
+				*h2 = *h1;
+				h1--;
+				h2--;
+			}
+		}
+		else {
+			int tl = ceil(len / 2.0f);
+			int rl = floor(len / 2.0f);
+
+			float* h1 = bufferHead;
+			float* h2 = buffer;
+
+			for (int i = 0; i < rl; i++) {
+				if (h1 == bufferEnd) h1 = bufferStart;
+				*h2 = *h1;
+				h1++;
+				h2++;
+			}
+
+			h1 = bufferHead - 1;
+			h2 = buffer + l - 1;
+
+			for (int i = 0; i < tl; i++) {
+				if (h1 == bufferStart - 1) h1 = bufferEnd - 1;
+				*h2 = *h1;
+				h1--;
+				h2--;
+			}
+		}
+		delete[] bufferStart;
+	}
+
+	bufferStart = buffer;
+	bufferHead = bufferStart;
+	bufferEnd = bufferStart + l;
+	len = l;
 }
