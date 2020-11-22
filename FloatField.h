@@ -17,6 +17,8 @@ private:
 	padding pad;
 	float anchorX = 0, anchorY = 0;
 	bool isNegative = false;
+	SDL_Rect area;
+
 public:
 	std::string capturedData;
 	int maxData = -1;
@@ -34,9 +36,6 @@ public:
 
 	FloatField() : InteractiveElement() {}
 
-	void setAnchor(float aX, float aY);
-	void setPosition(int x, int y);
-
 	void recalculateArea();
 
 	void focus();
@@ -44,35 +43,17 @@ public:
 
 	void setValue(float);
 
-	void setVisibleCharacters(int size) {
-		if (size <= 0) return;
-
-		visibleCharacters = size;
-		recalculateArea();
-	}
-
-	void setDigitSize(int size) {
-		if (size <= 0) return;
-
-		dstDigitSize = size;
-		recalculateArea();
-	}
-
-	void setDigitGap(int size) {
-		if (size < 0) return;
-
-		digitGap = size;
-		recalculateArea();
-	}
-
-	void setPadding(padding pad) {
-		this->pad = pad;
-
-		recalculateArea();
-	}
+	void setPosition(int x, int y);
+	void setAnchor(float aX, float aY);
+	void setVisibleCharacters(int size);
+	void setDigitSize(int size);
+	void setDigitGap(int size);
+	void setPadding(padding pad);
 
 	void update();
 	void render(SDL_Renderer* renderer);
+
+	bool inArea(int x, int y);
 };
 
 #endif

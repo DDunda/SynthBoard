@@ -17,6 +17,7 @@
 #include "FloatField.h"
 #include "TextField.h"
 #include "SimpleButton.h"
+#include "Slider.h";
 
 #define SOUND_BUFFER_SIZE 441
 float soundBuffer[SOUND_BUFFER_SIZE];
@@ -42,7 +43,7 @@ float deltaTime;
 bool soundRunning = true;
 std::atomic<bool> renderRequested(false);
 
-EasyPointer<FloatField> volField;
+EasyPointer<Slider> volSlider;
 EasyPointer<SimpleButton> testButton;
 EasyPointer<Modulator> freqMod;
 
@@ -91,24 +92,17 @@ void initialiseSDL() {
 	}
 }
 
-void SetupVolField() {
-	volField = new FloatField();
+void SetupVolSlider() {
+	volSlider = new Slider(0.0f, 1.0f, 0.05f);
 
-	volField->maxData = 8;
-	volField->setValue(0.05f);
-
-	volField->setAnchor(0, 0);
-	volField->setVisibleCharacters(8);
-	volField->setDigitSize(16);
-	volField->setPadding({ 8,10,8,10 });
-	volField->setDigitGap(0);
-	volField->srcDigitSize = 8;
-	volField->setPosition(25, 67);
-
-	volField->digits = num_text;
+	volSlider->setPosition(25, 67);
+	volSlider->setSliderWidth(100);
+	volSlider->setKnobRadius(5);
+	volSlider->setAnchor(0, 0);
+	volSlider->setPadding({ 8,10,8,10 });
 }
 
-void SetupPlayButton() {
+/*void SetupPlayButton() {
 	testButton = new SimpleButton();
 
 	testButton->setArea(32, 32);
@@ -121,7 +115,7 @@ void SetupPlayButton() {
 		else
 			finalFilter->stop();
 	};
-}
+}*/
 
 EasyPointer<Keyboard> board;
 
@@ -133,7 +127,7 @@ int main(int argc, char* argv[]) {
 
 	//SetupFileField();
 	//SetupPlayButton();
-	SetupVolField();
+	SetupVolSlider();
 	//SetupFreqField();
 		
 /* A simple melody
@@ -162,8 +156,8 @@ int main(int argc, char* argv[]) {
 
 	board = new Keyboard();
 
-	//EasyPointer<volumeFilter> volMod = new volumeFilter(song, volField);
-	EasyPointer<volumeFilter> volMod = new volumeFilter(board, volField);
+	//EasyPointer<volumeFilter> volMod = new volumeFilter(song, volSlider);
+	EasyPointer<volumeFilter> volMod = new volumeFilter(board, volSlider);
 
 	finalFilter = new fadeFilter(
 		volMod,
@@ -218,7 +212,7 @@ int main(int argc, char* argv[]) {
 		SDL_RenderPresent(renderer);
 
 		int frameEnd = SDL_GetTicks();
-		int tmp = 10 - (frameEnd - lastFrameEnd);
+		int tmp = 16 - (frameEnd - lastFrameEnd);
 		if (tmp > 0)
 			SDL_Delay(tmp);
 		lastFrameEnd = frameEnd;
@@ -243,9 +237,9 @@ int main(int argc, char* argv[]) {
 int li = 0;
 int soundDrawn = 0;
 void PushAudio(void* userdata, Uint8* stream, int len) {
-	SDL_SetRenderDrawColor(renderer, 255, 255, 255, 255);
 	if (waveOutput.isSet()) {
 		if (renderRequested.load()) {
+			SDL_SetRenderDrawColor(renderer, 255, 255, 255, 255);
 			for (int i = 0; i < len / sizeof(float); i++) {
 				soundBuffer[i] = waveOutput->Get();
 				if (soundBuffer[i] > soundMax) soundMax = soundBuffer[i];

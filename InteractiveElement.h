@@ -8,58 +8,31 @@
 
 class InteractiveElement : public RenderableElement
 {
-protected:
-	bool infocus = false;
+private:
+	// All the elements that can be interacted with the mouse, at the very least
+	// The order of elements in this list determines the drawing order
 	static std::vector<InteractiveElement*> interactiveElements;
+	// The element the mouse is on
 	static InteractiveElement* focusedElement;
-	static std::vector<RenderableElement*> elements;
 	
 public:
-	callback OnLeftPress = NULL;
-	callback OnLeftRelease = NULL;
-	callback OnRightPress = NULL;
-	callback OnRightRelease = NULL;
-	callback OnFocus = NULL;
-	callback OnUnfocus = NULL;
+	// Visible
+	bool active = true;
 
-	bool interactive = true;
-	SDL_Rect clickArea = {0,0,0,0};
+	InteractiveElement();
+	~InteractiveElement();
 
-	InteractiveElement() {
-		interactiveElements.push_back(this);
-	}
-	~InteractiveElement() {
-		interactiveElements.erase(std::find(interactiveElements.begin(), interactiveElements.end(), this));
-	}
+	// Called when the element gains focus
+	virtual void focus() {};
+	// Called when the element loses focus
+	virtual void unfocus() {};
 
-	virtual void focus() {
-		TryCall(OnFocus);
-		infocus = true;
-	};
-	virtual void unfocus() {
-		TryCall(OnUnfocus);
-		infocus = false;
-	};
-
-	static void UpdateElementFocus() {
-		if (buttonPressed(SDL_BUTTON_LEFT)) {
-			InteractiveElement* lastFocus = focusedElement;
-			focusedElement = NULL;
-
-			if (lastFocus != NULL && !lastFocus->infocus) lastFocus = NULL;
-
-			for (auto e : interactiveElements)
-				if (inBounds(e->clickArea, mouseX, mouseY) && e->interactive)
-					focusedElement = e;
-
-			if (lastFocus != focusedElement) {
-				if(lastFocus != NULL)
-					lastFocus->unfocus();
-				if(focusedElement != NULL)
-					focusedElement->focus();
-			}
-		}
-	}
+	// Checks if point is on the element
+	virtual bool inArea(int x, int y) = 0;
+	// Recalculates what element the mouse is on - to be called each frame
+	static void UpdateElementFocus();
+	// An element comes into "focus" when the mouse is in this area
+	bool inFocus();
 };
 
 #endif

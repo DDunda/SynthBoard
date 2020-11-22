@@ -18,25 +18,20 @@ class RenderableElement {
 protected:
 	static std::vector<RenderableElement*> elements;
 
-	void TryCall(callback c) {
-		if (c != NULL) c(this);
-	}
 public:
-	callback OnUpdate = NULL;
-	callback OnRender = NULL;
-
 	bool active = true;
 	bool visible = true;
 
 	RenderableElement();
 	~RenderableElement();
 
-	virtual void update() {
-		TryCall(OnUpdate);
-	};
-	virtual void render(SDL_Renderer*) {
-		TryCall(OnRender);
-	};
+	// Called after the button is updated
+	virtual void onUpdate() {};
+	// Called after the button is rendered
+	virtual void onRender(SDL_Renderer*) {};
+
+	virtual void update() = 0;
+	virtual void render(SDL_Renderer*) = 0;
 
 	static void UpdateAllElements();
 	static void RenderAllElements(SDL_Renderer*);

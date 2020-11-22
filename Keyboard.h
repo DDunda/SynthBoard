@@ -152,20 +152,20 @@ protected:
 				break;
 			case 2:
 				for (int i = 0; i < numOctaves * 12; i++) {
-					//keys[i]->sound->source = new dualMultiply(new fVal(0.3f), new squareSound(keys[i]->frequency));
-					keys[i]->sound->source = new squareSound(keys[i]->frequency);
+					keys[i]->sound->source = new dualMultiply(new fVal(0.3f), new squareSound(keys[i]->frequency));
+					//keys[i]->sound->source = new squareSound(keys[i]->frequency);
 				}
 				break;
 			case 3:
 				for (int i = 0; i < numOctaves * 12; i++) {
-					//keys[i]->sound->source = new dualMultiply(new fVal(0.3f), new sawtoothSound(keys[i]->frequency));
-					keys[i]->sound->source = new sawtoothSound(keys[i]->frequency);
+					keys[i]->sound->source = new dualMultiply(new fVal(0.3f), new sawtoothSound(keys[i]->frequency));
+					//keys[i]->sound->source = new sawtoothSound(keys[i]->frequency);
 				}
 				break;
 			case 4:
 				for (int i = 0; i < numOctaves * 12; i++) {
-					//keys[i]->sound->source = new dualMultiply(new fVal(0.3f), new noiseSound(keys[i]->frequency));
-					keys[i]->sound->source = new noiseSound(keys[i]->frequency);
+					keys[i]->sound->source = new dualMultiply(new fVal(0.3f), new noiseSound(keys[i]->frequency));
+					//keys[i]->sound->source = new noiseSound(keys[i]->frequency);
 				}
 				break;
 			}
@@ -185,7 +185,7 @@ public:
 	int pianoScale = 4;
 	
 	void update() {
-		TryCall(OnUpdate);
+		onUpdate();
 
 		pianoScale = floor(screenWidth / 356);
 
@@ -196,7 +196,7 @@ public:
 			PianoSize.y * pianoScale
 		};
 
-		waveformDrawArea = { 0,0,screenWidth, screenHeight / 2 };
+		waveformDrawArea = { 0,0,screenWidth, screenHeight - renderArea.h };
 
 		if (keyPressed(SDLK_LEFT)) {
 			if (firstOctave != 0) {
@@ -264,8 +264,6 @@ public:
 	};
 	void render(SDL_Renderer* r) {
 		if (keyTexture == NULL)	keyTexture = IMG_LoadTexture(r, "keys.png");
-
-		TryCall(OnRender);
 
 		//borderThickness = renderArea.w / ((long long)numOctaves * 7 * 10);
 
@@ -339,6 +337,8 @@ public:
 				if ((blackNum % 7) == 2 || (blackNum % 7) == 6) blackNum++;
 			}
 		}*/
+
+		onRender(r);
 	};
 
 	Keyboard() {

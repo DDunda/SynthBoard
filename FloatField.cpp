@@ -27,40 +27,23 @@ static std::map<SDL_Keycode, char> numberKeymapping
 	{SDLK_KP_9,'9'}
 };
 
-void FloatField::setAnchor(float aX, float aY) {
-	int posX = clickArea.x + clickArea.w * anchorX;
-	int posY = clickArea.y + clickArea.h * anchorY;
-
-	anchorX = aX;
-	anchorY = aY;
-
-	setPosition(posX, posY);
-}
-void FloatField::setPosition(int x, int y) {
-	clickArea.x = x - clickArea.w * anchorX;
-	clickArea.y = y - clickArea.h * anchorY;
-}
 
 void FloatField::recalculateArea() {
-	float globalAnchorX = clickArea.x + clickArea.w * anchorX;
-	float globalAnchorY = clickArea.y + clickArea.h * anchorY;
+	float globalAnchorX = area.x + area.w * anchorX;
+	float globalAnchorY = area.y + area.h * anchorY;
 
-	clickArea.w = visibleCharacters * dstDigitSize + (visibleCharacters - 1) * digitGap + pad.left + pad.right;
-	clickArea.h = dstDigitSize + pad.top + pad.bottom;
+	area.w = visibleCharacters * dstDigitSize + (visibleCharacters - 1) * digitGap + pad.left + pad.right;
+	area.h = dstDigitSize + pad.top + pad.bottom;
 
 	setPosition(globalAnchorX, globalAnchorY);
 }
 
 void FloatField::focus() {
 	//keyboardPipe = &keyPipe;
-	infocus = true;
 	flashCycleStart = currentTime;
 }
-
 void FloatField::unfocus() {
 	//keyboardPipe = &globalKeyboard;
-	infocus = false;
-
 	if (!capturedData.empty()) {
 		try
 		{
@@ -103,18 +86,55 @@ void FloatField::setValue(float v) {
 		caret = capturedData.size();
 }
 
+void FloatField::setPosition(int x, int y) {
+	area.x = x - area.w * anchorX;
+	area.y = y - area.h * anchorY;
+}
+void FloatField::setAnchor(float aX, float aY) {
+	int posX = area.x + area.w * anchorX;
+	int posY = area.y + area.h * anchorY;
+
+	anchorX = aX;
+	anchorY = aY;
+
+	setPosition(posX, posY);
+}
+void FloatField::setVisibleCharacters(int size) {
+	if (size <= 0) return;
+
+	visibleCharacters = size;
+	recalculateArea();
+}
+void FloatField::setDigitSize(int size) {
+	if (size <= 0) return;
+
+	dstDigitSize = size;
+	recalculateArea();
+}
+void FloatField::setDigitGap(int size) {
+	if (size < 0) return;
+
+	digitGap = size;
+	recalculateArea();
+}
+void FloatField::setPadding(padding pad) {
+	this->pad = pad;
+
+	recalculateArea();
+}
+
 void FloatField::update() {
-	if (infocus) {
+	if (inFocus()) {
 		if (buttonPressed(SDL_BUTTON_LEFT)) {
-			int caretsX = clickArea.x + pad.left + dstDigitSize * 0.5f;
-			int careteX = clickArea.x + pad.left + dstDigitSize * 0.5f + (std::min(visibleCharacters, (int)capturedData.size()) - 1) * (dstDigitSize + digitGap);
+			int caretsX = area.x + pad.left + dstDigitSize * 0.5f;
+			int careteX = area.x + pad.left + dstDigitSize * 0.5f + (std::min(visibleCharacters, (int)capturedData.size()) - 1) * (dstDigitSize + digitGap);
 
 			if (mouseX <= caretsX)
 				caret = 0;
 			else if (mouseX > careteX)
 				caret = capturedData.size();
 			else
-				caret = (mouseX - dstDigitSize * 0.5 - clickArea.x - pad.left) / ((long long)dstDigitSize + digitGap) + 1LL;
+				caret = (mouseX - dstDigitSize * 0.5 - area.x - pad.left) / ((long long)dstDigitSize + digitGap) + 1LL;
 		}
 
 		for (auto keypair : globalKeyboard.keys_keycode) {
@@ -209,15 +229,14 @@ void FloatField::update() {
 		}
 	}
 }
-
 void FloatField::render(SDL_Renderer* renderer) {
 	SDL_SetRenderDrawColor(renderer, 45, 40, 38, 255);
-	SDL_RenderFillRect(renderer, &clickArea);
+	SDL_RenderFillRect(renderer, &area);
 	SDL_SetRenderDrawColor(renderer, 206, 228, 234, 255);
-	SDL_RenderDrawRect(renderer, &clickArea);
+	SDL_RenderDrawRect(renderer, &area);
 
 	int start, end;
-	if (infocus) {
+	if (inFocus()) {
 		end = caret;
 		if (end < visibleCharacters) end = visibleCharacters;
 		if (end > capturedData.size()) end = capturedData.size();
@@ -281,28 +300,28 @@ void FloatField::render(SDL_Renderer* renderer) {
 		}
 
 		SDL_Rect dst{
-			clickArea.x + pad.left + (i - start) * (dstDigitSize + digitGap),
-			clickArea.y + pad.top,
+			area.x + pad.left + (i - start) * (dstDigitSize + digitGap),
+			area.y + pad.top,
 			dstDigitSize,
 			dstDigitSize
 		};
 		SDL_RenderCopy(renderer, digits, &src, &dst);
 	}
-	if (infocus && (currentTime - flashCycleStart) % (flashCycle * 2) < flashCycle) {
+	if (inFocus() && (currentTime - flashCycleStart) % (flashCycle * 2) < flashCycle) {
 		if (caret >= visibleCharacters) {
 			SDL_RenderDrawLine(renderer,
-				clickArea.x + pad.left + (dstDigitSize + digitGap) * visibleCharacters - digitGap / 2,
-				clickArea.y + pad.top,
-				clickArea.x + pad.left + (dstDigitSize + digitGap) * visibleCharacters - digitGap / 2,
-				clickArea.y + pad.top + dstDigitSize
+				area.x + pad.left + (dstDigitSize + digitGap) * visibleCharacters - digitGap / 2,
+				area.y + pad.top,
+				area.x + pad.left + (dstDigitSize + digitGap) * visibleCharacters - digitGap / 2,
+				area.y + pad.top + dstDigitSize
 			);
 		}
 		else {
 			SDL_RenderDrawLine(renderer,
-				clickArea.x + pad.left + ((long long)dstDigitSize + digitGap) * caret - digitGap / 2,
-				clickArea.y + pad.top,
-				clickArea.x + pad.left + ((long long)dstDigitSize + digitGap) * caret - digitGap / 2,
-				clickArea.y + pad.top + dstDigitSize
+				area.x + pad.left + ((long long)dstDigitSize + digitGap) * caret - digitGap / 2,
+				area.y + pad.top,
+				area.x + pad.left + ((long long)dstDigitSize + digitGap) * caret - digitGap / 2,
+				area.y + pad.top + dstDigitSize
 			);
 		}
 	}
@@ -312,3 +331,7 @@ float FloatField::Get() {
 	return output;
 }
 void FloatField::reset() {}
+
+bool FloatField::inArea(int x, int y) {
+	return inBounds(area, x, y);
+}

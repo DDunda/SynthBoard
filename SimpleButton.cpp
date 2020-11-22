@@ -1,41 +1,35 @@
 #include "SimpleButton.h"
 #include "Input.h"
 
-void SimpleButton::focus() {
-	TryCall(OnFocus);
-	infocus = true;
+// Gets state of button
+
+bool SimpleButton::isPressed() {
+	return state && !lastState;
+}
+bool SimpleButton::isReleased() {
+	return !state && lastState;
+}
+bool SimpleButton::isDown() {
+	return state;
+}
+bool SimpleButton::isUp() {
+	return !state;
 }
 
-void SimpleButton::unfocus() {
-	TryCall(OnUnfocus);
-	infocus = false;
-}
-
-bool SimpleButton::released() {
-	return !state && lastState && infocus;
-}
-bool SimpleButton::pressed() {
-	return state && !lastState && infocus;
-}
-bool SimpleButton::up() {
-	return !state && infocus;
-}
-bool SimpleButton::down() {
-	return state && infocus;
-}
+// Setting graphics 
 
 void SimpleButton::setArea(float w, float h) {
-	float posX = clickArea.x + clickArea.w * anchorX;
-	float posY = clickArea.y + clickArea.h * anchorY;
+	float posX = area.x + area.w * anchorX;
+	float posY = area.y + area.h * anchorY;
 
-	clickArea.w = w;
-	clickArea.h = h;
+	area.w = w;
+	area.h = h;
 
 	setPosition(posX, posY);
 }
 void SimpleButton::setAnchor(float aX, float aY) {
-	float posX = clickArea.x + clickArea.w * anchorX;
-	float posY = clickArea.y + clickArea.h * anchorY;
+	float posX = area.x + area.w * anchorX;
+	float posY = area.y + area.h * anchorY;
 
 	anchorX = aX;
 	anchorY = aY;
@@ -43,22 +37,35 @@ void SimpleButton::setAnchor(float aX, float aY) {
 	setPosition(posX, posY);
 }
 void SimpleButton::setPosition(int x, int y) {
-	clickArea.x = x - clickArea.w * anchorX;
-	clickArea.y = y - clickArea.h * anchorY;
+	area.x = x - area.w * anchorX;
+	area.y = y - area.h * anchorY;
 }
 
+// Dynamically running stuff
+
 void SimpleButton::update() {
-	TryCall(OnUpdate);
 	lastState = state;
-	state = inBounds(clickArea,mouseX,mouseY) && buttonDown(SDL_BUTTON_LEFT);
-	if (pressed())
-		TryCall(OnLeftPress);
-	if (released())
-		TryCall(OnLeftRelease);
+	if (!state && buttonDown(mouseButton) && inFocus()) {
+		onPress();
+		state = true;
+	}
+	if (state && buttonUp(mouseButton)) {
+		onRelease();
+		state = false;
+	}
+
+	onUpdate();
 }
 void SimpleButton::render(SDL_Renderer* r) {
-	TryCall(OnRender);
 	if (state) SDL_SetRenderDrawColor(r, 193, 193, 193, 255);
 	else SDL_SetRenderDrawColor(r, 226, 226, 226, 255);
-	SDL_RenderFillRect(r, &clickArea);
+	SDL_RenderFillRect(r, &area);
+
+	onRender(r);
+}
+
+// Checks if mouse is on button
+
+bool SimpleButton::inArea(int x, int y) {
+	return inBounds(area, x, y);
 }

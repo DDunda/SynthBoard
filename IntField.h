@@ -14,6 +14,8 @@ private:
 	int digitGap;
 	padding pad;
 	float anchorX, anchorY;
+	SDL_Rect area;
+
 public:
 	std::string capturedData;
 	int maxData = -1;
@@ -28,34 +30,17 @@ public:
 
 	IntField() : InteractiveElement() {}
 
-	void setAnchor(float aX, float aY);
-	void setPosition(int x, int y);
 
 	void recalculateArea();
 
 	void focus();
 	void unfocus();
 
-	void setVisibleCharacters(int size) {
-		if (size <= 0) return;
-
-		visibleCharacters = size;
-		recalculateArea();
-	}
-
-	void setDigitSize(int size) {
-		if (size <= 0) return;
-
-		dstDigitSize = size;
-		recalculateArea();
-	}
-
-	void setDigitGap(int size) {
-		if (size <= 0) return;
-
-		digitGap = size;
-		recalculateArea();
-	}
+	void setAnchor(float aX, float aY);
+	void setPosition(int x, int y);
+	void setVisibleCharacters(int size);
+	void setDigitSize(int size);
+	void setDigitGap(int size);
 
 	void update();
 	void render(SDL_Renderer* renderer);

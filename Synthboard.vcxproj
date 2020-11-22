@@ -159,6 +159,7 @@
   <ItemGroup>
     <ClCompile Include="AbstractedAccess.cpp" />
     <ClCompile Include="FloatField.cpp" />
+    <ClCompile Include="Helpers.cpp" />
     <ClCompile Include="InteractiveElement.cpp" />
     <ClCompile Include="IntField.cpp" />
     <ClCompile Include="Keyboard.cpp" />
@@ -166,12 +167,14 @@
     <ClCompile Include="Input.cpp" />
     <ClCompile Include="RenderableElement.cpp" />
     <ClCompile Include="SimpleButton.cpp" />
+    <ClCompile Include="Slider.cpp" />
     <ClCompile Include="Sound.cpp" />
     <ClCompile Include="TextField.cpp" />
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="AbstractedAccess.h" />
     <ClInclude Include="FloatField.h" />
+    <ClInclude Include="Helpers.h" />
     <ClInclude Include="Input.h" />
     <ClInclude Include="InteractiveElement.h" />
     <ClInclude Include="IntField.h" />
@@ -263,6 +266,7 @@
     <ClInclude Include="SDL2\include\SDL_video.h" />
     <ClInclude Include="SDL2\include\SDL_vulkan.h" />
     <ClInclude Include="SimpleButton.h" />
+    <ClInclude Include="Slider.h" />
     <ClInclude Include="Sound.h" />
     <ClInclude Include="TextField.h" />
   </ItemGroup>

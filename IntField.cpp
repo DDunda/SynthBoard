@@ -27,39 +27,20 @@ static std::map<SDL_Keycode, char> numberKeymapping
 	{SDLK_KP_9,'9'}
 };
 
-void IntField::setAnchor(float aX, float aY) {
-	float posX = clickArea.x + clickArea.w * anchorX;
-	float posY = clickArea.y + clickArea.h * anchorY;
-
-	anchorX = aX;
-	anchorY = aY;
-
-	setPosition(posX, posY);
-}
-
-void IntField::setPosition(int x, int y) {
-	clickArea.x = x - clickArea.w * anchorX;
-	clickArea.y = y - clickArea.h * anchorY;
-}
-
 void IntField::recalculateArea() {
-	float posX = clickArea.x + clickArea.w * anchorX;
-	float posY = clickArea.y + clickArea.h * anchorY;
+	float posX = area.x + area.w * anchorX;
+	float posY = area.y + area.h * anchorY;
 
-	clickArea.w = visibleCharacters * dstDigitSize + (visibleCharacters - 1) * digitGap + pad.left + pad.right;
-	clickArea.h = dstDigitSize + pad.top + pad.bottom;
+	area.w = visibleCharacters * dstDigitSize + (visibleCharacters - 1) * digitGap + pad.left + pad.right;
+	area.h = dstDigitSize + pad.top + pad.bottom;
 
 	setPosition(posX, posY);
 }
 
 void IntField::focus() {
-	infocus = true;
 	flashCycleStart = currentTime;
 }
-
 void IntField::unfocus() {
-	infocus = false;
-
 	if (!capturedData.empty()) {
 		try
 		{
@@ -76,8 +57,40 @@ void IntField::unfocus() {
 	}
 }
 
+void IntField::setAnchor(float aX, float aY) {
+	float posX = area.x + area.w * anchorX;
+	float posY = area.y + area.h * anchorY;
+
+	anchorX = aX;
+	anchorY = aY;
+
+	setPosition(posX, posY);
+}
+void IntField::setPosition(int x, int y) {
+	area.x = x - area.w * anchorX;
+	area.y = y - area.h * anchorY;
+}
+void IntField::setVisibleCharacters(int size) {
+	if (size <= 0) return;
+
+	visibleCharacters = size;
+	recalculateArea();
+}
+void IntField::setDigitSize(int size) {
+	if (size <= 0) return;
+
+	dstDigitSize = size;
+	recalculateArea();
+}
+void IntField::setDigitGap(int size) {
+	if (size <= 0) return;
+
+	digitGap = size;
+	recalculateArea();
+}
+
 void IntField::update() {
-	if (infocus) {
+	if (inFocus()) {
 		for (auto keypair : globalKeyboard.keys_keycode) {
 			if (keyPressed(keypair.first, &globalKeyboard)) {
 				if (numberKeymapping.count(keypair.first)) { // Key just corresponds to a character - no special behaviour
@@ -138,12 +151,11 @@ void IntField::update() {
 		}
 	}
 }
-
 void IntField::render(SDL_Renderer* renderer) {
 	SDL_SetRenderDrawColor(renderer, 45, 40, 38, 255);
-	SDL_RenderFillRect(renderer, &clickArea);
+	SDL_RenderFillRect(renderer, &area);
 	SDL_SetRenderDrawColor(renderer, 206, 228, 234, 255);
-	SDL_RenderDrawRect(renderer, &clickArea);
+	SDL_RenderDrawRect(renderer, &area);
 
 	int start = capturedData.size() - visibleCharacters;
 	if (start < 0) start = 0;
@@ -156,28 +168,28 @@ void IntField::render(SDL_Renderer* renderer) {
 			srcDigitSize
 		};
 		SDL_Rect dst{
-			clickArea.x + pad.left + (i - start) * (dstDigitSize + digitGap),
-			clickArea.y + pad.top,
+			area.x + pad.left + (i - start) * (dstDigitSize + digitGap),
+			area.y + pad.top,
 			dstDigitSize,
 			dstDigitSize
 		};
 		SDL_RenderCopy(renderer, digits, &src, &dst);
 	}
-	if (infocus && (currentTime - flashCycleStart) % (flashCycle * 2) < flashCycle) {
+	if (inFocus() && (currentTime - flashCycleStart) % (flashCycle * 2) < flashCycle) {
 		if (caret >= visibleCharacters) {
 			SDL_RenderDrawLine(renderer,
-				clickArea.x + pad.left + (dstDigitSize + digitGap) * visibleCharacters - digitGap / 2,
-				clickArea.y + pad.top,
-				clickArea.x + pad.left + (dstDigitSize + digitGap) * visibleCharacters - digitGap / 2,
-				clickArea.y + pad.top + dstDigitSize
+				area.x + pad.left + (dstDigitSize + digitGap) * visibleCharacters - digitGap / 2,
+				area.y + pad.top,
+				area.x + pad.left + (dstDigitSize + digitGap) * visibleCharacters - digitGap / 2,
+				area.y + pad.top + dstDigitSize
 			);
 		}
 		else {
 			SDL_RenderDrawLine(renderer,
-				clickArea.x + pad.left + (dstDigitSize + digitGap) * caret - digitGap / 2,
-				clickArea.y + pad.top,
-				clickArea.x + pad.left + (dstDigitSize + digitGap) * caret - digitGap / 2,
-				clickArea.y + pad.top + dstDigitSize
+				area.x + pad.left + (dstDigitSize + digitGap) * caret - digitGap / 2,
+				area.y + pad.top,
+				area.x + pad.left + (dstDigitSize + digitGap) * caret - digitGap / 2,
+				area.y + pad.top + dstDigitSize
 			);
 		}
 	}

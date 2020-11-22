@@ -119,8 +119,8 @@ static std::map<SDL_Keycode, char> shiftedKeymapping
 };
 
 void TextField::setAnchor(float aX, float aY) {
-	float posX = clickArea.x + clickArea.w * anchorX;
-	float posY = clickArea.y + clickArea.h * anchorY;
+	float posX = area.x + area.w * anchorX;
+	float posY = area.y + area.h * anchorY;
 
 	anchorX = aX;
 	anchorY = aY;
@@ -128,24 +128,22 @@ void TextField::setAnchor(float aX, float aY) {
 	setPosition(posX, posY);
 }
 void TextField::setPosition(int x, int y) {
-	clickArea.x = x - clickArea.w * anchorX;
-	clickArea.y = y - clickArea.h * anchorY;
+	area.x = x - area.w * anchorX;
+	area.y = y - area.h * anchorY;
 }
 
 void TextField::recalculateArea() {
-	float globalAnchorX = clickArea.x + clickArea.w * anchorX;
-	float globalAnchorY = clickArea.y + clickArea.h * anchorY;
+	float globalAnchorX = area.x + area.w * anchorX;
+	float globalAnchorY = area.y + area.h * anchorY;
 
-	clickArea.w = visibleCharacters * dstCharacterSize + (visibleCharacters - 1) * characterGap + pad.left + pad.right;
-	clickArea.h = dstCharacterSize + pad.top + pad.bottom;
+	area.w = visibleCharacters * dstCharacterSize + (visibleCharacters - 1) * characterGap + pad.left + pad.right;
+	area.h = dstCharacterSize + pad.top + pad.bottom;
 
 	setPosition(globalAnchorX, globalAnchorY);
 }
 
 void TextField::focus() {
-	TryCall(OnFocus);
 	//keyboardPipe = &keyPipe;
-	infocus = true;
 	flashCycleStart = currentTime;
 	textEditingOutput = &capturedData;
 	cursorOutput = &caret;
@@ -153,9 +151,7 @@ void TextField::focus() {
 }
 
 void TextField::unfocus() {
-	TryCall(OnUnfocus);
 	//keyboardPipe = &globalKeyboard;
-	infocus = false;
 	SDL_StopTextInput();
 	textEditingOutput = NULL;
 	cursorOutput = NULL;
@@ -172,31 +168,18 @@ void TextField::setValue(const std::string& s) {
 }
 
 void TextField::update() {
-	TryCall(OnUpdate);
-	if (!infocus) return;
-
-	if (buttonPressed(SDL_BUTTON_LEFT))
-		TryCall(OnLeftPress);
-
-	if (buttonReleased(SDL_BUTTON_LEFT))
-		TryCall(OnLeftRelease);
-
-	if (buttonPressed(SDL_BUTTON_RIGHT))
-		TryCall(OnRightPress);
-
-	if (buttonReleased(SDL_BUTTON_RIGHT))
-		TryCall(OnRightRelease);
+	if (!inFocus()) return;
 
 	if (buttonPressed(SDL_BUTTON_LEFT)) {
-		int caretsX = clickArea.x + pad.left + dstCharacterSize * 0.5;
-		int careteX = clickArea.x + pad.left + dstCharacterSize * 0.5 + (std::min(visibleCharacters, (int)capturedData.size()) - 1) * (dstCharacterSize + characterGap);
+		int caretsX = area.x + pad.left + dstCharacterSize * 0.5;
+		int careteX = area.x + pad.left + dstCharacterSize * 0.5 + (std::min(visibleCharacters, (int)capturedData.size()) - 1) * (dstCharacterSize + characterGap);
 
 		if (mouseX <= caretsX)
 			caret = 0;
 		else if (mouseX > careteX)
 			caret = capturedData.size();
 		else
-			caret = (mouseX - dstCharacterSize * 0.5 - clickArea.x - pad.left) / (dstCharacterSize + characterGap) + 1;
+			caret = (mouseX - dstCharacterSize * 0.5 - area.x - pad.left) / (dstCharacterSize + characterGap) + 1;
 	}
 
 	SDL_Keymod mod = SDL_GetModState();
@@ -286,17 +269,19 @@ void TextField::update() {
 		if (inputResolved)
 			flashCycleStart = currentTime;
 	}
+
+	onUpdate();
 }
 
 void TextField::render(SDL_Renderer* renderer) {
-	TryCall(OnRender);
+	onRender(renderer);
 	SDL_SetRenderDrawColor(renderer, 45, 40, 38, 255);
-	SDL_RenderFillRect(renderer, &clickArea);
+	SDL_RenderFillRect(renderer, &area);
 	SDL_SetRenderDrawColor(renderer, 206, 228, 234, 255);
-	SDL_RenderDrawRect(renderer, &clickArea);
+	SDL_RenderDrawRect(renderer, &area);
 
 	int start, end;
-	if (infocus) {
+	if (inFocus()) {
 		end = caret;
 		if (end < visibleCharacters) end = visibleCharacters;
 		if (end > capturedData.size()) end = capturedData.size();
@@ -320,28 +305,28 @@ void TextField::render(SDL_Renderer* renderer) {
 			};
 
 		SDL_Rect dst{
-			clickArea.x + pad.left + (i - start) * (dstCharacterSize + characterGap),
-			clickArea.y + pad.top,
+			area.x + pad.left + (i - start) * (dstCharacterSize + characterGap),
+			area.y + pad.top,
 			dstCharacterSize,
 			dstCharacterSize
 		};
 		SDL_RenderCopy(renderer, characters, &src, &dst);
 	}
-	if (infocus && (currentTime - flashCycleStart) % (flashCycle * 2) < flashCycle) {
+	if (inFocus() && (currentTime - flashCycleStart) % (flashCycle * 2) < flashCycle) {
 		if (caret >= visibleCharacters) {
 			SDL_RenderDrawLine(renderer,
-				clickArea.x + pad.left + (dstCharacterSize + characterGap) * visibleCharacters - characterGap / 2,
-				clickArea.y + pad.top,
-				clickArea.x + pad.left + (dstCharacterSize + characterGap) * visibleCharacters - characterGap / 2,
-				clickArea.y + pad.top + dstCharacterSize
+				area.x + pad.left + (dstCharacterSize + characterGap) * visibleCharacters - characterGap / 2,
+				area.y + pad.top,
+				area.x + pad.left + (dstCharacterSize + characterGap) * visibleCharacters - characterGap / 2,
+				area.y + pad.top + dstCharacterSize
 			);
 		}
 		else {
 			SDL_RenderDrawLine(renderer,
-				clickArea.x + pad.left + (dstCharacterSize + characterGap) * caret - characterGap / 2,
-				clickArea.y + pad.top,
-				clickArea.x + pad.left + (dstCharacterSize + characterGap) * caret - characterGap / 2,
-				clickArea.y + pad.top + dstCharacterSize
+				area.x + pad.left + (dstCharacterSize + characterGap) * caret - characterGap / 2,
+				area.y + pad.top,
+				area.x + pad.left + (dstCharacterSize + characterGap) * caret - characterGap / 2,
+				area.y + pad.top + dstCharacterSize
 			);
 		}
 	}

@@ -65,6 +65,12 @@
     <ClCompile Include="Sound.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
+    <ClCompile Include="Slider.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="Helpers.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <CopyFileToFolders Include="SDL2_mixer\lib\x64\libFLAC-8.dll">
@@ -167,6 +173,9 @@
       <Filter>Resource Files</Filter>
     </CopyFileToFolders>
     <CopyFileToFolders Include="Nums.png">
+      <Filter>Resource Files</Filter>
+    </CopyFileToFolders>
+    <CopyFileToFolders Include="Keys.png">
       <Filter>Resource Files</Filter>
     </CopyFileToFolders>
   </ItemGroup>
@@ -456,6 +465,10 @@
     <ClInclude Include="Sound.h">
       <Filter>Headers</Filter>
     </ClInclude>
+    <ClInclude Include="Slider.h" />
+    <ClInclude Include="Helpers.h">
+      <Filter>Headers</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <Image Include="keyboard icon.ico">
@@ -465,9 +478,6 @@
       <Filter>Resource Files</Filter>
     </Image>
     <Image Include="icon2.ico">
-      <Filter>Resource Files</Filter>
-    </Image>
-    <Image Include="Keys.png">
       <Filter>Resource Files</Filter>
     </Image>
   </ItemGroup>

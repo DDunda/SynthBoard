@@ -72,7 +72,7 @@ static bool buttonPressed(Uint8 button) {
 	return mouse_buttons[button].down > last_mouse_buttons[button].down;
 }
 static bool buttonReleased(Uint8 button) {
-	return mouse_buttons[button].up > mouse_buttons[button].up;
+	return mouse_buttons[button].up > last_mouse_buttons[button].up;
 }
 static bool buttonDown(Uint8 button) {
 	return mouse_buttons[button].down > mouse_buttons[button].up;

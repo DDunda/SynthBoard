@@ -17,6 +17,8 @@ private:
 	int characterGap = 2;
 	padding pad;
 	float anchorX = 0, anchorY = 0;
+	SDL_Rect area;
+
 public:
 
 	std::string capturedData = "";
@@ -43,28 +45,24 @@ public:
 	void unfocus();
 
 	void setValue(const std::string&);
-
 	void setVisibleCharacters(int size) {
 		if (size <= 0) return;
 
 		visibleCharacters = size;
 		recalculateArea();
 	}
-
 	void setCharacterSize(int size) {
 		if (size <= 0) return;
 
 		dstCharacterSize = size;
 		recalculateArea();
 	}
-
 	void setCharacterGap(int size) {
 		if (size < 0) return;
 
 		characterGap = size;
 		recalculateArea();
 	}
-
 	void setPadding(padding pad) {
 		this->pad = pad;
 
