@@ -1,15 +1,18 @@
 #include "Slider.h"
 #include "Helpers.h"
 
-float Slider::Get() {
-	return valueB * sliderPercent + valueA * (1 - sliderPercent);
+void Slider::CalculateState() {
+	output.backValue = valueB * sliderPercent + valueA * (1 - sliderPercent);
+}
+void Slider::PresentState() {
+	output.PresentValue();
 }
 
 void Slider::setPosition(int x, int y) {
 	area.x = x - area.w * anchorX;
 	area.y = y - area.h * anchorY;
 }
-void Slider::setAnchor(float aX, float aY) {
+void Slider::setAnchor(double aX, double aY) {
 	int posX = area.x + area.w * anchorX;
 	int posY = area.y + area.h * anchorY;
 

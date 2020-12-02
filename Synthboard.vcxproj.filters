@@ -62,13 +62,22 @@
     <ClCompile Include="Keyboard.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="Sound.cpp">
-      <Filter>Source Files</Filter>
-    </ClCompile>
     <ClCompile Include="Slider.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
     <ClCompile Include="Helpers.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="Sound_old.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="Sound.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="Module.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="SoundConstants.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
   </ItemGroup>
@@ -462,11 +471,22 @@
     <ClInclude Include="SimpleButton.h">
       <Filter>Headers</Filter>
     </ClInclude>
+    <ClInclude Include="Helpers.h">
+      <Filter>Headers</Filter>
+    </ClInclude>
+    <ClInclude Include="Sound_old.h">
+      <Filter>Headers</Filter>
+    </ClInclude>
+    <ClInclude Include="SoundConstants.h">
+      <Filter>Headers</Filter>
+    </ClInclude>
     <ClInclude Include="Sound.h">
       <Filter>Headers</Filter>
     </ClInclude>
-    <ClInclude Include="Slider.h" />
-    <ClInclude Include="Helpers.h">
+    <ClInclude Include="Slider.h">
+      <Filter>Headers</Filter>
+    </ClInclude>
+    <ClInclude Include="Module.h">
       <Filter>Headers</Filter>
     </ClInclude>
   </ItemGroup>

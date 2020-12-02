@@ -1,22 +1,24 @@
 #pragma once
 
-
-
-
 #include <SDL.h>
 #include "InteractiveElement.h"
 #include "AbstractedAccess.h"
+#include "Module.h"
 
-class Slider : public Source<float>, public InteractiveElement
+class Slider : public Module, public InteractiveElement
 {
+	class SliderOutput : public Output<double>{
+		friend Slider;
+		SliderOutput(double d) : Output<double>(d) {}
+	};
 private:
-	float sliderPercent = 0;
-	float sliderWidth = 100;
-	float knobRadius = 5;
+	double sliderPercent = 0;
+	double sliderWidth = 100;
+	double knobRadius = 5;
 	bool knobGrabbed = false;
 	int grabOffset = 0;
 	padding pad = {0,0,0,0};
-	float anchorX = 0, anchorY = 0;
+	double anchorX = 0, anchorY = 0;
 
 	SDL_Rect area = {0,0,0,0};
 
@@ -25,16 +27,20 @@ private:
 	SDL_Colour lineColour { 127, 127, 127, 255 };
 	SDL_Colour knobColour { 127, 127, 127, 255 };
 
+protected:
+	void CalculateState();
+	void PresentState();
+
 public:
-	float valueA;
-	float valueB;
+	double valueA;
+	double valueB;
 
-	float Get();
-	void reset() {};
+	SliderOutput output;
 
-	Slider(float a, float b, float p = 0.5) : valueA(a), valueB(b), sliderPercent(p) {
+	Slider(double a, double b, double p = 0.5) : valueA(a), valueB(b), sliderPercent(p), output(0.0) {
 		if (sliderPercent > 1) sliderPercent = 1;
 		if (sliderPercent < 0) sliderPercent = 0;
+		output.backValue = a + sliderPercent * (b - a);
 
 		recalculateArea();
 	};
@@ -42,7 +48,7 @@ public:
 	void recalculateArea();
 
 	void setPosition(int x, int y);
-	void setAnchor(float aX, float aY);
+	void setAnchor(double aX, double aY);
 	void setPadding(padding pad);
 	void setKnobRadius(int r);
 	void setSliderWidth(int r);

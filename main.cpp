@@ -27,10 +27,6 @@ void PushAudio(void* userdata, Uint8* stream, int len);
 SDL_Texture* num_text;
 SDL_Texture* char_text;
 
-struct tone {
-	float freq, vol;
-};
-
 float soundMin = 0;
 float soundMax = 0;
 int samples = 441;
@@ -43,12 +39,7 @@ float deltaTime;
 bool soundRunning = true;
 std::atomic<bool> renderRequested(false);
 
-EasyPointer<Slider> volSlider;
-EasyPointer<SimpleButton> testButton;
-EasyPointer<Modulator> freqMod;
-
-EasyPointer<fadeFilter> finalFilter;
-EasyPointer<Source<float>> waveOutput;
+Input waveOutput;
 SDL_Renderer* renderer = NULL;
 
 SDL_Window* window = NULL;
@@ -92,32 +83,16 @@ void initialiseSDL() {
 	}
 }
 
+Slider* volSlider;
+
 void SetupVolSlider() {
 	volSlider = new Slider(0.0f, 1.0f, 0.05f);
-
 	volSlider->setPosition(25, 67);
 	volSlider->setSliderWidth(100);
 	volSlider->setKnobRadius(5);
 	volSlider->setAnchor(0, 0);
 	volSlider->setPadding({ 8,10,8,10 });
 }
-
-/*void SetupPlayButton() {
-	testButton = new SimpleButton();
-
-	testButton->setArea(32, 32);
-	testButton->setAnchor(0, 0);
-	testButton->setPosition(183, 109);
-
-	testButton->OnLeftRelease = [](RenderableElement* txt) -> void {
-		if (finalFilter->isStopped())
-			finalFilter->start();
-		else
-			finalFilter->stop();
-	};
-}*/
-
-EasyPointer<Keyboard> board;
 
 int main(int argc, char* argv[]) {
 	initialiseSDL();	
@@ -129,42 +104,20 @@ int main(int argc, char* argv[]) {
 	//SetupPlayButton();
 	SetupVolSlider();
 	//SetupFreqField();
-		
-/* A simple melody
-	C4,E4,A4,B4,
-	C4,E4,A4,B4,
-	C4,E4,A4,B4,
-	C4,E4,A4,B4,
 
-	Bf3,D4,G4,A4,
-	Bf3,D4,G4,A4,
-	Bf3,D4,G4,A4,
-	Bf3,D4,G4,A4,
+	Keyboard board;
+	Constant sineF(1000.0);
+	Sine sine(&sineF.out_output);
 
-	Gf3,Bf3,Ef4,F4,
-	Gf3,Bf3,Ef4,F4,
-	Gf3,Bf3,Ef4,F4,
-	Gf3,Bf3,Ef4,F4,
+	Volume volMod(board.output, &volSlider->output);
 
-	Df3,F3,Bf3,C4,
-	Df3,F3,Bf3,C4,
-	Df3,F3,Bf3,C4,
-	Df3,C4,Bf3,F3,
-*/
-	
-	//song = new PianoRoll("Melody1.prm");
-
-	board = new Keyboard();
-
-	//EasyPointer<volumeFilter> volMod = new volumeFilter(song, volSlider);
-	EasyPointer<volumeFilter> volMod = new volumeFilter(board, volSlider);
-
-	finalFilter = new fadeFilter(
-		volMod,
-		new Val<float>(0.01f),
-		new Val<float>(1000.0f)
+	Constant decay(1000.0);
+	Fader fader(
+		&volMod.out_output,
+		&decay.out_output,
+		&decay.out_output
 	);
-	waveOutput = finalFilter;
+	waveOutput = &(fader.out_output);
 
 	SDL_PauseAudio(0);
 
@@ -172,7 +125,7 @@ int main(int argc, char* argv[]) {
 
 	int lastFrameEnd = SDL_GetTicks();
 
-	finalFilter->start();
+	fader.Start();
 	
 	while (running || soundRunning) {
 		lastTime = currentTime;
@@ -194,10 +147,10 @@ int main(int argc, char* argv[]) {
 				powf(10,F3vField->output / 10.0) / (powf((i + 1 - F3Field->output) / F3sField->output, 2.0) + 1.0);
 		}*/
 
-		if (!running && !finalFilter->isStopped())
-			finalFilter->stop();
+		if (!running && fader.IsOn())
+			fader.Stop();
 
-		if (finalFilter->finished())
+		if (!fader.IsOn() && !fader.IsChanging())
 			soundRunning = false;
 
 		float mult = deltaTime / 100;
@@ -237,11 +190,14 @@ int main(int argc, char* argv[]) {
 int li = 0;
 int soundDrawn = 0;
 void PushAudio(void* userdata, Uint8* stream, int len) {
-	if (waveOutput.isSet()) {
+	SDL_LockMutex(Module::registryLock);
+	if (waveOutput != NULL) {
 		if (renderRequested.load()) {
 			SDL_SetRenderDrawColor(renderer, 255, 255, 255, 255);
 			for (int i = 0; i < len / sizeof(float); i++) {
-				soundBuffer[i] = waveOutput->Get();
+				Module::CalculateAllModuleStates();
+				Module::PresentAllModuleStates();
+				soundBuffer[i] = *waveOutput;
 				if (soundBuffer[i] > soundMax) soundMax = soundBuffer[i];
 				if (-soundBuffer[i] > soundMax) soundMax = -soundBuffer[i];
 				if (soundMax < 0.001f) soundMax = 0.001f;
@@ -249,7 +205,7 @@ void PushAudio(void* userdata, Uint8* stream, int len) {
 				if (renderRequested.load()) {
 					int lx = waveformDrawArea.x + (soundDrawn - 1) * waveformDrawArea.w / samples;
 					int x = waveformDrawArea.x + soundDrawn * waveformDrawArea.w / samples;
-					if (!finalFilter->finished()) {
+					///if (!finalFilter->finished()) {
 						float fitted = 1.0f - (soundBuffer[li] / 2.0f + soundMax) / 2.0f / soundMax;
 						float nextFitted = 1.0f - (soundBuffer[i] / 2.0f + soundMax) / 2.0f / soundMax;
 						SDL_RenderDrawLine(renderer,
@@ -257,13 +213,13 @@ void PushAudio(void* userdata, Uint8* stream, int len) {
 							waveformDrawArea.y + (int)(waveformDrawArea.h * fitted),
 							x,
 							waveformDrawArea.y + (int)(waveformDrawArea.h * nextFitted));
-					}
+					/*}
 					else {
 						SDL_SetRenderDrawColor(renderer, 0, 0, 0, 255);
 						SDL_RenderDrawLine(renderer, x, waveformDrawArea.y, x, waveformDrawArea.y + waveformDrawArea.h);
 						SDL_SetRenderDrawColor(renderer, 255, 255, 255, 255);
 						SDL_RenderDrawPoint(renderer, x, waveformDrawArea.y + waveformDrawArea.h / 2);
-					}
+					}*/
 					soundDrawn++;
 				}
 
@@ -276,7 +232,9 @@ void PushAudio(void* userdata, Uint8* stream, int len) {
 		}
 		else {
 			for (int i = 0; i < len / sizeof(float); i++) {
-				soundBuffer[i] = waveOutput->Get();
+				Module::CalculateAllModuleStates();
+				Module::PresentAllModuleStates();
+				soundBuffer[i] = *waveOutput;
 				if (soundBuffer[i] > soundMax) soundMax = soundBuffer[i];
 				if (-soundBuffer[i] > soundMax) soundMax = -soundBuffer[i];
 				if (soundMax < 0.001f) soundMax = 0.001f;
@@ -312,5 +270,6 @@ void PushAudio(void* userdata, Uint8* stream, int len) {
 		}
 	}
 
+	SDL_UnlockMutex(Module::registryLock);
 	SDL_memcpy(stream, soundBuffer, len);
 }
