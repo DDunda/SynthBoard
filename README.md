@@ -1,32 +1,37 @@
 # Synthboard
+Synthboard is real-time digital synthesizer, controlled as a piano from your keyboard and implemented with the SDL-Sound pipeline.
 SDL-Sound is an ongoing project exploring sound with SDL, and ways to play it at runtime.
-This implementation of SDL-Sound uses the synthesizer pipeline to create music like how a piano would, and is controlled by your keyboard for real-time playback.
 
-![Synthboard](https://cdn.discordapp.com/attachments/364021339486421004/736567447129423912/Synthboard.png)
+![Synthboard](https://github.com/DDunda/PromotionalMaterials/blob/master/Synthboard.png)
 
 ## How to compile Synthboard
 SDL-Sound, and Synthboard, are both written as standard C++ Visual Studio projects that can be compiled and ran.
-However, the libraries for SDL2, and SDL2_image, are required for compilation. You can get SDL2 and SDL2_image from the following links,
-and then simply copy them into the project directory to the folders called SDL2, and SDL2_image. Make sure to download the **development libraries** for both.
+SDL2, SDL2_image, and SDL2_mixer, are required for compilation; you can get these libraries from the following links,
+and then simply copy them into the project directory to the folders called SDL2, and SDL2_image, and SDL2_mixer. Make sure to download the **development libraries** for both.
 - SDL2: https://www.libsdl.org/download-2.0.php
 - SDL2_image: https://www.libsdl.org/projects/SDL_image/
-
-*P.S. Don't worry about SDL2_mixer, even though it's in the project it's not being used right now.*
+- SDL2_image: https://www.libsdl.org/projects/SDL_mixer/
 
 ## How to run Synthboard
-Once you've compiled Synthboard you can find the program output folder. There will be a lot of files, but to run Synthboard you can use the generated exe.
+Once you've compiled Synthboard you can find the program in the output folder. There will be a lot of files, but to run Synthboard just use the generated exe. If you wish to move the exe, the accompanying .dll files must be moved as well.
 
 ## How to use Synthboard
 The controls are quite simple.
-- **Tab-\\** and **z-m** control **white keys**, and keys **1-backspace** and **s-j** control **black keys**. They are arranged the way a real piano would be.
-- You can also play the piano with your mouse.
+- The piano keys are arranged on your keyboard, in the way a real piano would be.
+  - You can also play the piano with your mouse.
 - The **left and right arrows** move the piano left and right, changing the octave.
 - The **up and down arrows** change the synthesizer between the following:
   - Sine wave
   - Triangle wave
   - Square wave
+  - Triangle pulse
+  - Square pulse
   - Sawtooth wave
   - Whitenoise
-- The box in the upper-left controls volume. Be warned that 0.01 is a quite moderate volume, so anything above 1 can be very loud and peak your speakers!
+- The first slider controls volume.
+- The second slider lowers the resolution of the sound, an optional effect.
+- The third slider controls the decay of the echo effect.
+- The fourth slider controls the delay of the echo effect.
+- The fith slider controls the duty cycle of pulse waves.
 
-![Keyboard layout](https://cdn.discordapp.com/attachments/364021339486421004/736566105702793256/Keyboard_piano_4x.png)
+![Keyboard layout](https://github.com/DDunda/PromotionalMaterials/blob/master/Layout.png)
