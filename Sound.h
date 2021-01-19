@@ -5,51 +5,49 @@
 
 #include "Module.h"
 
-#define MakeModule(name) \
-class name : public Module {\
-	class name##Output : public Output<double> {\
-		friend name;\
-		name##Output(double d) : Output<double>(d) {}\
-	};\
-	void CalculateState();\
-	void PresentState();
-
 using namespace std;
-typedef Output<double>* Input;
 
 MakeModule(Sine)
 protected:
 	double t = 0;
+
 public:
 	Input in_frequency;
 	SineOutput out_output;
+
 	Sine(Input frequency);
 };
 
 MakeModule(Square)
 protected:
 	double t = 0;
+
 public:
 	Input in_frequency;
 	SquareOutput out_output;
+
 	Square(Input frequency);
 };
 
 MakeModule(Sawtooth)
 protected:
 	double t = 0;
+
 public:
 	Input in_frequency;
 	SawtoothOutput out_output;
+
 	Sawtooth(Input frequency);
 };
 
 MakeModule(Triangle)
 protected:
 	double t = 0;
+
 public:
 	Input in_frequency;
 	TriangleOutput out_output;
+
 	Triangle(Input frequency);
 };
 
@@ -67,10 +65,35 @@ public:
 	Noise(Input frequency);
 };
 
+MakeModule(SquarePulse)
+private:
+	double t = 0;
+
+public:
+	Input in_frequency;
+	Input in_duty;
+	SquarePulseOutput out_output;
+
+	SquarePulse(Input input, Input duty);
+};
+
+MakeModule(TrianglePulse)
+private:
+	double t = 0;
+
+public:
+	Input in_frequency;
+	Input in_duty;
+	TrianglePulseOutput out_output;
+
+	TrianglePulse(Input input, Input duty);
+};
+
 MakeModule(Constant)
 public:
 	double value = 0;
 	ConstantOutput out_output;
+
 	Constant(double value);
 };
 
@@ -78,6 +101,7 @@ MakeModule(Multiplier)
 public:
 	vector<Input> in_sources;
 	MultiplierOutput out_output;
+
 	Multiplier(vector<Input> sources);
 };
 
@@ -85,6 +109,7 @@ MakeModule(Adder)
 public:
 	vector<Input> in_sources;
 	AdderOutput out_output;
+
 	Adder(vector<Input> sources);
 };
 
@@ -102,26 +127,31 @@ MakeModule(Flipper)
 public:
 	Input in_input;
 	FlipperOutput out_output;
+
 	Flipper(Input input);
 };
 
 MakeModule(Volume)
 protected:
 	double internalVolume;
+
 public:
 	Input in_input;
 	Input in_targetVolume;
 	VolumeOutput out_output;
+
 	Volume(Input input, Input targetVolume);
 };
 
 MakeModule(Limiter)
 protected:
 	double internalVolume;
+
 public:
 	Input in_input;
 	Input in_max;
 	LimiterOutput out_output;
+
 	Limiter(Input input, Input max);
 };
 
@@ -130,16 +160,19 @@ protected:
 	double volume = 0.0;
 	bool state = false;
 	bool changing = false;
+
 public:
 	Input in_input;
 	Input in_attackRate;
 	Input in_releaseRate;
 	FaderOutput out_output;
+
+	Fader(Input input, Input attack, Input release);
+
 	void Stop();
 	void Start();
 	bool IsOn();
 	bool IsChanging();
-	Fader(Input input, Input attack, Input release);
 };
 
 MakeModule(LowPass)
@@ -150,13 +183,15 @@ protected:
 	double alpha;
 
 	double lastOutput = 0;
+
 public:
 	Input in_input;
 	Input in_cutoff;
 	LowPassOutput out_output;
 
-	void SetCutoff(double cutoff);
 	LowPass(Input input, Input cutoff);
+
+	void SetCutoff(double cutoff);
 };
 
 MakeModule(HighPass)
@@ -168,13 +203,15 @@ protected:
 
 	double lastRawOutput = 0;
 	double lastOutput = 0;
+
 public:
 	Input in_input;
 	Input in_cutoff;
 	HighPassOutput out_output;
 
-	void SetCutoff(double cutoff);
 	HighPass(Input input, Input cutoff);
+
+	void SetCutoff(double cutoff);
 };
 
 MakeModule(Delay)
@@ -183,6 +220,7 @@ protected:
 	double* bufferEnd = NULL;
 	double* bufferHead = NULL;
 	int len = 0;
+
 	void SetLen(int l);
 
 public:
@@ -200,5 +238,15 @@ public:
 	Input in_input;
 	Input in_resolution;
 	BitCrusherOutput out_output;
+
 	BitCrusher(Input input, Input resolution);
+};
+
+MakeModule(BitCrusher2)
+public:
+	Input in_input;
+	Input in_resolution;
+	BitCrusher2Output out_output;
+
+	BitCrusher2(Input input, Input resolution);
 };

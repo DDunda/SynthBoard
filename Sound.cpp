@@ -53,6 +53,26 @@ void Triangle::PresentState() {
 	out_output.PresentValue();
 }
 
+SquarePulse::SquarePulse(Input f, Input d) : in_frequency(f), in_duty(d), out_output(0.0) {}
+void SquarePulse::CalculateState() {
+	t += *in_frequency / SOUND_FREQUENCY;
+	t = fmod(t, 1.0);
+	out_output.backValue = t < *in_duty ? 1.0 : -1.0;
+}
+void SquarePulse::PresentState() {
+	out_output.PresentValue();
+}
+
+TrianglePulse::TrianglePulse(Input f, Input d) : in_frequency(f), in_duty(d), out_output(0.0) {}
+void TrianglePulse::CalculateState() {
+	t += *in_frequency / SOUND_FREQUENCY;
+	t = fmod(t, 1.0);
+	out_output.backValue = t < *in_duty ? 1.0 - 2.0 * t / *in_duty : -1.0 + 2.0 * (t - *in_duty) / (1.0 - *in_duty);
+}
+void TrianglePulse::PresentState() {
+	out_output.PresentValue();
+}
+
 Noise::Noise(Input frequency) : in_frequency(frequency), out_output(0.0) {}
 void Noise::SetRandomAmplitude() {
 	amplitude = roundf(rand() / (float)RAND_MAX) * 2 - 1;
@@ -302,5 +322,14 @@ void BitCrusher::CalculateState() {
 	else out_output.backValue = round(*in_input / *in_resolution) * *in_resolution;
 }
 void BitCrusher::PresentState() {
+	out_output.PresentValue();
+}
+
+BitCrusher2::BitCrusher2(Input input, Input resolution) : in_input(input), in_resolution(resolution), out_output(0.0) {}
+void BitCrusher2::CalculateState() {
+	if (*in_resolution <= 0) out_output.backValue = *in_input;
+	else out_output.backValue = (round(*in_input / *in_resolution + 0.5) - 0.5) * *in_resolution;
+}
+void BitCrusher2::PresentState() {
 	out_output.PresentValue();
 }

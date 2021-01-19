@@ -30,6 +30,15 @@
     <Filter Include="Headers">
       <UniqueIdentifier>{1f0584c6-63a1-4da2-b1af-33bb2a93e3f4}</UniqueIdentifier>
     </Filter>
+    <Filter Include="Modules">
+      <UniqueIdentifier>{d981d46d-3023-4859-a18d-71b03a6bb68d}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Modules\Sound">
+      <UniqueIdentifier>{f59af00f-186b-499b-8a48-7c41e386b0cf}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Modules\Filters">
+      <UniqueIdentifier>{707e3d8d-6bf8-4dbc-910c-793bb1fd2e6e}</UniqueIdentifier>
+    </Filter>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="Input.cpp">
@@ -71,14 +80,17 @@
     <ClCompile Include="Sound_old.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="Sound.cpp">
+    <ClCompile Include="SoundConstants.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
     <ClCompile Include="Module.cpp">
-      <Filter>Source Files</Filter>
+      <Filter>Modules</Filter>
     </ClCompile>
-    <ClCompile Include="SoundConstants.cpp">
-      <Filter>Source Files</Filter>
+    <ClCompile Include="Sound.cpp">
+      <Filter>Modules\Sound</Filter>
+    </ClCompile>
+    <ClCompile Include="Filters.cpp">
+      <Filter>Modules\Filters</Filter>
     </ClCompile>
   </ItemGroup>
   <ItemGroup>
@@ -480,14 +492,17 @@
     <ClInclude Include="SoundConstants.h">
       <Filter>Headers</Filter>
     </ClInclude>
-    <ClInclude Include="Sound.h">
-      <Filter>Headers</Filter>
-    </ClInclude>
     <ClInclude Include="Slider.h">
       <Filter>Headers</Filter>
     </ClInclude>
     <ClInclude Include="Module.h">
-      <Filter>Headers</Filter>
+      <Filter>Modules</Filter>
+    </ClInclude>
+    <ClInclude Include="Sound.h">
+      <Filter>Modules\Sound</Filter>
+    </ClInclude>
+    <ClInclude Include="Filters.h">
+      <Filter>Modules\Filters</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>

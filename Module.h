@@ -47,3 +47,15 @@ public:
 	Output(T t) : backValue(t), frontValue(t) {}
 	operator T() const { return frontValue; } // This is probably a bad idea
 };
+
+
+#define MakeModule(name) \
+class name : public Module {\
+	class name##Output : public Output<double> {\
+		friend name;\
+		name##Output(double d) : Output<double>(d) {}\
+	};\
+	void CalculateState();\
+	void PresentState();
+
+typedef Output<double>* Input;

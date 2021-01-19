@@ -87,7 +87,7 @@ Slider* volSlider;
 
 void SetupVolSlider() {
 	volSlider = new Slider(0.0f, 1.0f, 0.05f);
-	volSlider->setPosition(25, 67);
+	volSlider->setPosition(25, 27);
 	volSlider->setSliderWidth(100);
 	volSlider->setKnobRadius(5);
 	volSlider->setAnchor(0, 0);
@@ -117,7 +117,11 @@ int main(int argc, char* argv[]) {
 		&decay.out_output,
 		&decay.out_output
 	);
-	waveOutput = &(fader.out_output);
+
+	//Constant frequencyCutoff(20000);
+	//LowPass frequencyLimiter(&fader.out_output,&frequencyCutoff.out_output);
+	LowPassButter frequencyLimiter(&fader.out_output, 8000.0, 2);
+	waveOutput = &frequencyLimiter.out_output;
 
 	SDL_PauseAudio(0);
 

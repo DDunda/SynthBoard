@@ -4,6 +4,7 @@
 
 #include "Input.h"
 #include "Sound.h"
+#include "Filters.h"
 #include "SoundConstants.h"
 #include "AbstractedAccess.h"
 #include "RenderableElement.h"
@@ -18,14 +19,12 @@ extern void DrawRectWithBorder(SDL_Renderer* renderer, SDL_Rect area, int t, SDL
 class Key {
 protected:
 	Keyboard& parent;
-	Module* generator;
+	BitCrusher2 crusher;
 
 public:
 	Constant frequency;
 	Constant faderDecayRate;
 	Fader fader;
-	Constant cutoffFrequency;
-	LowPass frequencyLimiter;
 	Output<double>* output;
 
 	int noteNum;
@@ -37,39 +36,27 @@ public:
 
 	void SetFrequency(float f) {
 		frequency.value = f;
-		cutoffFrequency.value = 4 * f;
 	}
 	void SetOctave(int o) {
 		SetFrequency(Octaves::OctaveSet[o]->notes[noteNum]);
 	}
-	void SetGenerator(Module* m, Input i) {
-		if(generator) delete generator;
-		generator = m;
-		fader.in_input = i;
+	void SetGenerator(Input i) {
+		crusher.in_input = i;
 	}
-	Key(Keyboard& p, int octave, int number, SDL_Scancode keycode) : parent(p),
-		//frequency(new dualMultiply(new propertyWave(5.0f, 0.0f, 0.99f, 1.01f),rawFrequency)) 
+	Key(Keyboard& p, int octave, int number, SDL_Scancode keycode, Input res) : parent(p),
 		frequency(0.0),
+		crusher(NULL, res),
 		noteNum(number),
 		faderDecayRate(100.0),
-		fader(NULL,&faderDecayRate.out_output,&faderDecayRate.out_output),
-		cutoffFrequency(0.0),
-		frequencyLimiter(&fader.out_output, &cutoffFrequency.out_output)
+		fader(&crusher.out_output,&faderDecayRate.out_output,&faderDecayRate.out_output)
 	{
 		key = keycode;
 
 		white = (number <= 4 && !(number & 1)) || (number > 4 && (number & 1));
 
-		Sine* tmp = new Sine(&frequency.out_output);
-
-		SetGenerator(tmp, &tmp->out_output);
-
-		output = &frequencyLimiter.out_output;
+		output = &fader.out_output;
 
 		SetOctave(octave);
-	}
-	~Key() {
-		if(generator) delete generator;
 	}
 	void stop() {
 		fader.Stop();
@@ -130,11 +117,13 @@ protected:
 	Adder adder;
 	Constant targetVolume;
 	Volume volume;
-	BitCrusher crusher;
+	//BitCrusher2 crusher;
 	Delay echo;
 
+	std::vector<Module*> keyGenerators;
+
 	Key& MakeKey(int o, int n, SDL_Scancode k) {
-		keys.push_back(new Key(*this, o, n, k));
+		keys.push_back(new Key(*this, o, n, k, &resSlider.output));
 		return *keys[keys.size()-1];
 	}
 
@@ -144,11 +133,16 @@ protected:
 		}
 	}
 
-	void SetSynths(int synth) {
-		synth = ((synth % 5) + 5) % 5;
+	void SetSynths(unsigned synth) {
+		synth = synth % 7;
 		if (synth != selectedSynth) {
+			SDL_LockMutex(Module::registryLock);
+			for (Module* m : keyGenerators) delete m;
+			SDL_UnlockMutex(Module::registryLock);
+			keyGenerators.clear();
 			// Sine Triangle Square Sawtooth Noise
 			selectedSynth = synth;
+			dutSlider.visible = false;
 			switch (selectedSynth)
 			{
 			case 0:
@@ -156,7 +150,8 @@ protected:
 				for (int i = 0; i < numOctaves * 12; i++) {
 					SDL_LockMutex(Module::registryLock);
 					Sine* tmp = new Sine(&keys[i]->frequency.out_output);
-					keys[i]->SetGenerator(tmp, &tmp->out_output);
+					keys[i]->SetGenerator(&tmp->out_output);
+					keyGenerators.push_back(tmp);
 					SDL_UnlockMutex(Module::registryLock);
 				}
 				break;
@@ -165,7 +160,8 @@ protected:
 				for (int i = 0; i < numOctaves * 12; i++) {
 					SDL_LockMutex(Module::registryLock);
 					Triangle* tmp = new Triangle(&keys[i]->frequency.out_output);
-					keys[i]->SetGenerator(tmp, &tmp->out_output);
+					keys[i]->SetGenerator(&tmp->out_output);
+					keyGenerators.push_back(tmp);
 					SDL_UnlockMutex(Module::registryLock);
 				}
 				break;
@@ -174,25 +170,50 @@ protected:
 				for (int i = 0; i < numOctaves * 12; i++) {
 					SDL_LockMutex(Module::registryLock);
 					Square* tmp = new Square(&keys[i]->frequency.out_output);
-					keys[i]->SetGenerator(tmp, &tmp->out_output);
+					keys[i]->SetGenerator(&tmp->out_output);
+					keyGenerators.push_back(tmp);
 					SDL_UnlockMutex(Module::registryLock);
 				}
 				break;
 			case 3:
-				targetVolume.value = 0.3;
+				targetVolume.value = 1.0;
+				dutSlider.visible = true;
 				for (int i = 0; i < numOctaves * 12; i++) {
 					SDL_LockMutex(Module::registryLock);
-					Sawtooth* tmp = new Sawtooth(&keys[i]->frequency.out_output);
-					keys[i]->SetGenerator(tmp, &tmp->out_output);
+					TrianglePulse* tmp = new TrianglePulse(&keys[i]->frequency.out_output, &dutSlider.output);
+					keys[i]->SetGenerator(&tmp->out_output);
+					keyGenerators.push_back(tmp);
 					SDL_UnlockMutex(Module::registryLock);
 				}
 				break;
 			case 4:
 				targetVolume.value = 0.3;
+				dutSlider.visible = true;
+				for (int i = 0; i < numOctaves * 12; i++) {
+					SDL_LockMutex(Module::registryLock);
+					SquarePulse* tmp = new SquarePulse(&keys[i]->frequency.out_output, &dutSlider.output);
+					keys[i]->SetGenerator(&tmp->out_output);
+					keyGenerators.push_back(tmp);
+					SDL_UnlockMutex(Module::registryLock);
+				}
+				break;
+			case 5:
+				targetVolume.value = 0.3;
+				for (int i = 0; i < numOctaves * 12; i++) {
+					SDL_LockMutex(Module::registryLock);
+					Sawtooth* tmp = new Sawtooth(&keys[i]->frequency.out_output);
+					keys[i]->SetGenerator(&tmp->out_output);
+					keyGenerators.push_back(tmp);
+					SDL_UnlockMutex(Module::registryLock);
+				}
+				break;
+			case 6:
+				targetVolume.value = 0.3;
 				for (int i = 0; i < numOctaves * 12; i++) {
 					SDL_LockMutex(Module::registryLock);
 					Noise* tmp = new Noise(&keys[i]->frequency.out_output);
-					keys[i]->SetGenerator(tmp, &tmp->out_output);
+					keys[i]->SetGenerator(&tmp->out_output);
+					keyGenerators.push_back(tmp);
 					SDL_UnlockMutex(Module::registryLock);
 				}
 				break;
@@ -203,12 +224,13 @@ protected:
 	Slider durSlider;
 	Slider decSlider;
 	Slider resSlider;
+	Slider dutSlider;
 
 public:
 	SDL_Rect renderArea;
 	static SDL_Scancode KeyMapping[36];
 	int firstOctave = 2;
-	int selectedSynth = 0;
+	int selectedSynth = -1;
 
 	int borderThickness = 5;
 
@@ -251,7 +273,7 @@ public:
 		}
 
 		if (keyPressed(SDLK_DOWN)) {
-			SetSynths(selectedSynth - 1);
+			SetSynths((selectedSynth + 5) % 6);
 		}
 
 		bool blackKeyClicked = false;
@@ -380,33 +402,43 @@ public:
 		targetVolume(1.0),
 		volume(&adder.out_output, &targetVolume.out_output),
 		resSlider(0.0,1.0,0.0),
-		crusher(&volume.out_output, &resSlider.output),
+		//crusher(&volume.out_output, &resSlider.output),
 		decSlider(0, 1, 0.25),
 		durSlider(0, 1, 0.25),
-		echo(&crusher.out_output, &durSlider.output, &decSlider.output),
+		dutSlider(0, 1, 0.25),
+		echo(&volume.out_output, &durSlider.output, &decSlider.output),
 		output(&echo.out_output) {
 		renderArea = { 0,screenHeight / 2, screenWidth, screenHeight / 2 };
 
 		for (int i = 0; i < numOctaves * 12; i++)
 			adder.in_sources.push_back(MakeKey(firstOctave + i / 12, i % 12, KeyMapping[i]).output);
 
-		resSlider.setPosition(25, 107);
+		SetSynths(0);
+
+		resSlider.setPosition(25, 67);
 		resSlider.setSliderWidth(100);
 		resSlider.setKnobRadius(5);
 		resSlider.setAnchor(0, 0);
 		resSlider.setPadding({ 8,10,8,10 });
 
-		decSlider.setPosition(25, 147);
+		decSlider.setPosition(25, 107);
 		decSlider.setSliderWidth(100);
 		decSlider.setKnobRadius(5);
 		decSlider.setAnchor(0, 0);
 		decSlider.setPadding({ 8,10,8,10 });
 
-		durSlider.setPosition(25, 187);
+		durSlider.setPosition(25, 147);
 		durSlider.setSliderWidth(100);
 		durSlider.setKnobRadius(5);
 		durSlider.setAnchor(0, 0);
 		durSlider.setPadding({ 8,10,8,10 });
+
+		dutSlider.setPosition(25, 187);
+		dutSlider.setSliderWidth(100);
+		dutSlider.setKnobRadius(5);
+		dutSlider.setAnchor(0, 0);
+		dutSlider.setPadding({ 8,10,8,10 });
+		dutSlider.visible = false;
 	}
 
 	~Keyboard() {
