@@ -5,7 +5,6 @@
 #include <ctime>
 #include <vector>
 #include <map>
-#include <atomic>
 
 #define SOUND_FREQUENCY 44100.0
 
@@ -18,30 +17,24 @@
 #include "TextField.h"
 #include "SimpleButton.h"
 #include "Slider.h";
+#include "Waveform.h"
 
 #define SOUND_BUFFER_SIZE 441
-float soundBuffer[SOUND_BUFFER_SIZE];
+Sint32 soundBuffer[SOUND_BUFFER_SIZE];
 
 void PushAudio(void* userdata, Uint8* stream, int len);
 
 SDL_Texture* num_text;
 SDL_Texture* char_text;
 
-float soundMin = 0;
-float soundMax = 0;
-int samples = 441;
-
-SDL_Rect waveformDrawArea = { 0,0,640,360 };
 Uint32 lastTime;
 Uint32 currentTime;
 float deltaTime;
 
 bool soundRunning = true;
-std::atomic<bool> renderRequested(false);
 
 Input waveOutput;
 SDL_Renderer* renderer = NULL;
-
 SDL_Window* window = NULL;
 
 void initialiseSDL() {
@@ -55,7 +48,7 @@ void initialiseSDL() {
 
 	SDL_AudioSpec config;
 	config.freq = (int)SOUND_FREQUENCY;
-	config.format = AUDIO_F32;
+	config.format = AUDIO_S32;
 	config.channels = 1;
 	config.callback = PushAudio;
 	config.samples = SOUND_BUFFER_SIZE;
@@ -86,7 +79,7 @@ void initialiseSDL() {
 Slider* volSlider;
 
 void SetupVolSlider() {
-	volSlider = new Slider(0.0f, 1.0f, 0.05f);
+	volSlider = new Slider(0.0f, 1.0f, soundRegistry, 0.05f);
 	volSlider->setPosition(25, 27);
 	volSlider->setSliderWidth(100);
 	volSlider->setKnobRadius(5);
@@ -106,8 +99,6 @@ int main(int argc, char* argv[]) {
 	//SetupFreqField();
 
 	Keyboard board;
-	Constant sineF(1000.0);
-	Sine sine(&sineF.out_output);
 
 	Volume volMod(board.output, &volSlider->output);
 
@@ -121,7 +112,11 @@ int main(int argc, char* argv[]) {
 	//Constant frequencyCutoff(20000);
 	//LowPass frequencyLimiter(&fader.out_output,&frequencyCutoff.out_output);
 	LowPassButter frequencyLimiter(&fader.out_output, 8000.0, 2);
-	waveOutput = &frequencyLimiter.out_output;
+
+	Waveform waveform(&frequencyLimiter.out_output, 441);
+	waveform.drawArea = { 0,0,640,360 };
+
+	waveOutput = &waveform.out_output;
 
 	SDL_PauseAudio(0);
 
@@ -141,7 +136,7 @@ int main(int argc, char* argv[]) {
 		SDL_RenderClear(renderer);
 
 		InteractiveElement::UpdateElementFocus();
-		RenderableElement::UpdateAllElements();
+		RenderableElement::UpdateAllElements(deltaTime);
 		Updater::updateAllSources();
 
 		/*for (int i = 0; i < harmonics; i++) {
@@ -157,13 +152,7 @@ int main(int argc, char* argv[]) {
 		if (!fader.IsOn() && !fader.IsChanging())
 			soundRunning = false;
 
-		float mult = deltaTime / 100;
-		if (mult < 0) mult = 0;
-
-		soundMax -= mult;
-		
-		renderRequested.store(true);
-		while (renderRequested.load()) SDL_Delay(1);
+		waveform.drawArea = { 0,0,screenWidth, screenHeight - board.renderArea.h };
 
 		RenderableElement::RenderAllElements(renderer);
 		SDL_RenderPresent(renderer);
@@ -190,90 +179,25 @@ int main(int argc, char* argv[]) {
 	return EXIT_SUCCESS;
 }
 
-
-int li = 0;
-int soundDrawn = 0;
 void PushAudio(void* userdata, Uint8* stream, int len) {
-	SDL_LockMutex(Module::registryLock);
+	int numSamples = len / sizeof(Sint32);
 	if (waveOutput != NULL) {
-		if (renderRequested.load()) {
-			SDL_SetRenderDrawColor(renderer, 255, 255, 255, 255);
-			for (int i = 0; i < len / sizeof(float); i++) {
-				Module::CalculateAllModuleStates();
-				Module::PresentAllModuleStates();
-				soundBuffer[i] = *waveOutput;
-				if (soundBuffer[i] > soundMax) soundMax = soundBuffer[i];
-				if (-soundBuffer[i] > soundMax) soundMax = -soundBuffer[i];
-				if (soundMax < 0.001f) soundMax = 0.001f;
-
-				if (renderRequested.load()) {
-					int lx = waveformDrawArea.x + (soundDrawn - 1) * waveformDrawArea.w / samples;
-					int x = waveformDrawArea.x + soundDrawn * waveformDrawArea.w / samples;
-					///if (!finalFilter->finished()) {
-						float fitted = 1.0f - (soundBuffer[li] / 2.0f + soundMax) / 2.0f / soundMax;
-						float nextFitted = 1.0f - (soundBuffer[i] / 2.0f + soundMax) / 2.0f / soundMax;
-						SDL_RenderDrawLine(renderer,
-							lx,
-							waveformDrawArea.y + (int)(waveformDrawArea.h * fitted),
-							x,
-							waveformDrawArea.y + (int)(waveformDrawArea.h * nextFitted));
-					/*}
-					else {
-						SDL_SetRenderDrawColor(renderer, 0, 0, 0, 255);
-						SDL_RenderDrawLine(renderer, x, waveformDrawArea.y, x, waveformDrawArea.y + waveformDrawArea.h);
-						SDL_SetRenderDrawColor(renderer, 255, 255, 255, 255);
-						SDL_RenderDrawPoint(renderer, x, waveformDrawArea.y + waveformDrawArea.h / 2);
-					}*/
-					soundDrawn++;
-				}
-
-				if (soundDrawn == samples) {
-					renderRequested.store(false);
-					soundDrawn = 0;
-				}
-				li = i;
-			}
+		SDL_LockMutex(soundRegistry.lock);
+		for (int i = 0; i < numSamples; i++) {
+			soundRegistry.CalculateAllModuleStatesUnsafe();
+			soundRegistry.PresentAllModuleStatesUnsafe();
+			Sint64 t = *waveOutput * (Sint64)0x80000000;
+			if (t > SDL_MAX_SINT32) t = SDL_MAX_SINT32;
+			if (t < SDL_MIN_SINT32) t = SDL_MIN_SINT32;
+			soundBuffer[i] = t;
 		}
-		else {
-			for (int i = 0; i < len / sizeof(float); i++) {
-				Module::CalculateAllModuleStates();
-				Module::PresentAllModuleStates();
-				soundBuffer[i] = *waveOutput;
-				if (soundBuffer[i] > soundMax) soundMax = soundBuffer[i];
-				if (-soundBuffer[i] > soundMax) soundMax = -soundBuffer[i];
-				if (soundMax < 0.001f) soundMax = 0.001f;
-				li = i;
-			}
-		}
+		SDL_UnlockMutex(soundRegistry.lock);
 	}
 	else {
-		if (renderRequested.load()) {
-			for (int i = 0; i < len / sizeof(float); i++) {
-				soundBuffer[i] = 0;
-				if (renderRequested.load()) {
-					SDL_SetRenderDrawColor(renderer, 0, 0, 0, 255);
-					SDL_RenderDrawLine(renderer, soundDrawn, 0, soundDrawn, 360);
-					SDL_SetRenderDrawColor(renderer, 255, 255, 255, 255);
-					SDL_RenderDrawPoint(renderer, soundDrawn - 1, 179);
-					soundDrawn++;
-				}
-
-				if (soundDrawn == samples) {
-					renderRequested.store(false);
-					soundDrawn = 0;
-					break;
-				}
-				li = i;
-			}
-		}
-		else {
-			for (int i = 0; i < len / sizeof(float); i++) {
-				soundBuffer[i] = 0;
-				li = i;
-			}
+		for (int i = 0; i < numSamples; i++) {
+			soundBuffer[i] = 0;
 		}
 	}
 
-	SDL_UnlockMutex(Module::registryLock);
-	SDL_memcpy(stream, soundBuffer, len);
+	memcpy(stream, soundBuffer, len);
 }

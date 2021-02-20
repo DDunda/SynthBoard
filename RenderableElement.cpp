@@ -11,10 +11,10 @@ RenderableElement::~RenderableElement() {
 		elements.erase(iter);
 }
 
-void RenderableElement::UpdateAllElements() {
+void RenderableElement::UpdateAllElements(double dT) {
 	for (RenderableElement* e : elements)
 		if (e->active)
-			e->update();
+			e->update(dT);
 }
 
 void RenderableElement::RenderAllElements(SDL_Renderer* r) {

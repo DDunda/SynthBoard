@@ -30,10 +30,10 @@ public:
 	// Called after the button is rendered
 	virtual void onRender(SDL_Renderer*) {};
 
-	virtual void update() = 0;
+	virtual void update(double) = 0;
 	virtual void render(SDL_Renderer*) = 0;
 
-	static void UpdateAllElements();
+	static void UpdateAllElements(double);
 	static void RenderAllElements(SDL_Renderer*);
 };
 

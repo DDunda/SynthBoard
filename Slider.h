@@ -37,7 +37,7 @@ public:
 
 	SliderOutput output;
 
-	Slider(double a, double b, double p = 0.5) : valueA(a), valueB(b), sliderPercent(p), output(0.0) {
+	Slider(double a, double b, ModuleRegistry& registry, double p = 0.5) : Module(registry), valueA(a), valueB(b), sliderPercent(p), output(0.0) {
 		if (sliderPercent > 1) sliderPercent = 1;
 		if (sliderPercent < 0) sliderPercent = 0;
 		output.backValue = a + sliderPercent * (b - a);
@@ -53,7 +53,7 @@ public:
 	void setKnobRadius(int r);
 	void setSliderWidth(int r);
 
-	void update();
+	void update(double);
 	void render(SDL_Renderer*);
 
 	void unfocus() {};

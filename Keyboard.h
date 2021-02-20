@@ -10,8 +10,6 @@
 #include "RenderableElement.h"
 #include "Slider.h"
 
-extern SDL_Rect waveformDrawArea;
-
 class Keyboard;
 
 extern void DrawRectWithBorder(SDL_Renderer* renderer, SDL_Rect area, int t, SDL_Colour inner, SDL_Colour border);
@@ -43,12 +41,12 @@ public:
 	void SetGenerator(Input i) {
 		crusher.in_input = i;
 	}
-	Key(Keyboard& p, int octave, int number, SDL_Scancode keycode, Input res) : parent(p),
-		frequency(0.0),
-		crusher(NULL, res),
+	Key(Keyboard& p, int octave, int number, SDL_Scancode keycode, Input res, ModuleRegistry& registry) : parent(p),
+		frequency(0.0, registry),
+		crusher(NULL, res, registry),
 		noteNum(number),
-		faderDecayRate(100.0),
-		fader(&crusher.out_output,&faderDecayRate.out_output,&faderDecayRate.out_output)
+		faderDecayRate(100.0, registry),
+		fader(&crusher.out_output,&faderDecayRate.out_output,&faderDecayRate.out_output, registry)
 	{
 		key = keycode;
 
@@ -71,6 +69,8 @@ public:
 
 class Keyboard : public RenderableElement {
 protected:
+	ModuleRegistry& registry;
+
 	int numOctaves = 3;
 
 	const static SDL_Rect BlackInactive;
@@ -123,7 +123,7 @@ protected:
 	std::vector<Module*> keyGenerators;
 
 	Key& MakeKey(int o, int n, SDL_Scancode k) {
-		keys.push_back(new Key(*this, o, n, k, &resSlider.output));
+		keys.push_back(new Key(*this, o, n, k, &resSlider.output, registry));
 		return *keys[keys.size()-1];
 	}
 
@@ -136,9 +136,7 @@ protected:
 	void SetSynths(unsigned synth) {
 		synth = synth % 7;
 		if (synth != selectedSynth) {
-			SDL_LockMutex(Module::registryLock);
 			for (Module* m : keyGenerators) delete m;
-			SDL_UnlockMutex(Module::registryLock);
 			keyGenerators.clear();
 			// Sine Triangle Square Sawtooth Noise
 			selectedSynth = synth;
@@ -148,73 +146,59 @@ protected:
 			case 0:
 				targetVolume.value = 1.0;
 				for (int i = 0; i < numOctaves * 12; i++) {
-					SDL_LockMutex(Module::registryLock);
-					Sine* tmp = new Sine(&keys[i]->frequency.out_output);
+					Sine* tmp = new Sine(&keys[i]->frequency.out_output, registry);
 					keys[i]->SetGenerator(&tmp->out_output);
 					keyGenerators.push_back(tmp);
-					SDL_UnlockMutex(Module::registryLock);
 				}
 				break;
 			case 1:
 				targetVolume.value = 1.0;
 				for (int i = 0; i < numOctaves * 12; i++) {
-					SDL_LockMutex(Module::registryLock);
-					Triangle* tmp = new Triangle(&keys[i]->frequency.out_output);
+					Triangle* tmp = new Triangle(&keys[i]->frequency.out_output, registry);
 					keys[i]->SetGenerator(&tmp->out_output);
 					keyGenerators.push_back(tmp);
-					SDL_UnlockMutex(Module::registryLock);
 				}
 				break;
 			case 2:
 				targetVolume.value = 0.3;
 				for (int i = 0; i < numOctaves * 12; i++) {
-					SDL_LockMutex(Module::registryLock);
-					Square* tmp = new Square(&keys[i]->frequency.out_output);
+					Square* tmp = new Square(&keys[i]->frequency.out_output, registry);
 					keys[i]->SetGenerator(&tmp->out_output);
 					keyGenerators.push_back(tmp);
-					SDL_UnlockMutex(Module::registryLock);
 				}
 				break;
 			case 3:
 				targetVolume.value = 1.0;
 				dutSlider.visible = true;
 				for (int i = 0; i < numOctaves * 12; i++) {
-					SDL_LockMutex(Module::registryLock);
-					TrianglePulse* tmp = new TrianglePulse(&keys[i]->frequency.out_output, &dutSlider.output);
+					TrianglePulse* tmp = new TrianglePulse(&keys[i]->frequency.out_output, &dutSlider.output, registry);
 					keys[i]->SetGenerator(&tmp->out_output);
 					keyGenerators.push_back(tmp);
-					SDL_UnlockMutex(Module::registryLock);
 				}
 				break;
 			case 4:
 				targetVolume.value = 0.3;
 				dutSlider.visible = true;
 				for (int i = 0; i < numOctaves * 12; i++) {
-					SDL_LockMutex(Module::registryLock);
-					SquarePulse* tmp = new SquarePulse(&keys[i]->frequency.out_output, &dutSlider.output);
+					SquarePulse* tmp = new SquarePulse(&keys[i]->frequency.out_output, &dutSlider.output, registry);
 					keys[i]->SetGenerator(&tmp->out_output);
 					keyGenerators.push_back(tmp);
-					SDL_UnlockMutex(Module::registryLock);
 				}
 				break;
 			case 5:
 				targetVolume.value = 0.3;
 				for (int i = 0; i < numOctaves * 12; i++) {
-					SDL_LockMutex(Module::registryLock);
-					Sawtooth* tmp = new Sawtooth(&keys[i]->frequency.out_output);
+					Sawtooth* tmp = new Sawtooth(&keys[i]->frequency.out_output, registry);
 					keys[i]->SetGenerator(&tmp->out_output);
 					keyGenerators.push_back(tmp);
-					SDL_UnlockMutex(Module::registryLock);
 				}
 				break;
 			case 6:
 				targetVolume.value = 0.3;
 				for (int i = 0; i < numOctaves * 12; i++) {
-					SDL_LockMutex(Module::registryLock);
-					Noise* tmp = new Noise(&keys[i]->frequency.out_output);
+					Noise* tmp = new Noise(&keys[i]->frequency.out_output, registry);
 					keys[i]->SetGenerator(&tmp->out_output);
 					keyGenerators.push_back(tmp);
-					SDL_UnlockMutex(Module::registryLock);
 				}
 				break;
 			}
@@ -240,7 +224,7 @@ public:
 
 	Output<double>* output;
 	
-	void update() {
+	void update(double dT) {
 		onUpdate();
 
 		pianoScale = floor(screenWidth / 356);
@@ -251,8 +235,6 @@ public:
 			PianoSize.x * pianoScale,
 			PianoSize.y * pianoScale
 		};
-
-		waveformDrawArea = { 0,0,screenWidth, screenHeight - renderArea.h };
 
 		if (keyPressed(SDLK_LEFT)) {
 			if (firstOctave != 0) {
@@ -397,16 +379,17 @@ public:
 		onRender(r);
 	};
 
-	Keyboard() :
-		adder({}),
-		targetVolume(1.0),
-		volume(&adder.out_output, &targetVolume.out_output),
-		resSlider(0.0,1.0,0.0),
+	Keyboard(ModuleRegistry& registry = soundRegistry) :
+		registry(registry),
+		adder({}, registry),
+		targetVolume(1.0, registry),
+		volume(&adder.out_output, &targetVolume.out_output, registry),
+		resSlider(0, 1, registry, 0),
 		//crusher(&volume.out_output, &resSlider.output),
-		decSlider(0, 1, 0.25),
-		durSlider(0, 1, 0.25),
-		dutSlider(0, 1, 0.25),
-		echo(&volume.out_output, &durSlider.output, &decSlider.output),
+		decSlider(0, 1, registry, 0.25),
+		durSlider(0, 1, registry, 0.25),
+		dutSlider(0, 1, registry, 0.25),
+		echo(&volume.out_output, &durSlider.output, &decSlider.output, registry),
 		output(&echo.out_output) {
 		renderArea = { 0,screenHeight / 2, screenWidth, screenHeight / 2 };
 

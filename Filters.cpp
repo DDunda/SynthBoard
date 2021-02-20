@@ -1,7 +1,7 @@
 #include "Filters.h"
 #include "SoundConstants.h"
 
-LowPassButter::LowPassButter(Input input, double cutoff, unsigned int order) : in_input(input), out_output(0.0) {
+LowPassButter::LowPassButter(Input input, double cutoff, unsigned int order, ModuleRegistry& registry) : Module(registry), in_input(input), out_output(0.0) {
     n = order;
     double a = tan(M_PI * cutoff / SOUND_FREQUENCY);
     double a2 = a * a;
@@ -51,7 +51,7 @@ void LowPassButter::PresentState() {
     out_output.PresentValue();
 }
 
-HighPassButter::HighPassButter(Input input, double cutoff, unsigned int order) : in_input(input), out_output(0.0) {
+HighPassButter::HighPassButter(Input input, double cutoff, unsigned int order, ModuleRegistry& registry) : Module(registry), in_input(input), out_output(0.0) {
     n = order;
     double a = tan(M_PI * cutoff / SOUND_FREQUENCY);
     double a2 = a * a;
@@ -101,7 +101,7 @@ void HighPassButter::PresentState() {
     out_output.PresentValue();
 }
 
-BandPassButter::BandPassButter(Input input, double lowerCutoff, double upperCutoff, unsigned int order) : in_input(input), out_output(0.0) {
+BandPassButter::BandPassButter(Input input, double lowerCutoff, double upperCutoff, unsigned int order, ModuleRegistry& registry) : Module(registry), in_input(input), out_output(0.0) {
     n = order;
     double a = cos(M_PI * (upperCutoff + lowerCutoff) / SOUND_FREQUENCY) / cos(M_PI * (upperCutoff - lowerCutoff) / SOUND_FREQUENCY);
     double a2 = a * a;
@@ -166,7 +166,7 @@ void BandPassButter::PresentState() {
     out_output.PresentValue();
 }
 
-BandStopButter::BandStopButter(Input input, double lowerCutoff, double upperCutoff, unsigned int order) : in_input(input), out_output(0.0) {
+BandStopButter::BandStopButter(Input input, double lowerCutoff, double upperCutoff, unsigned int order, ModuleRegistry& registry) : Module(registry), in_input(input), out_output(0.0) {
     n = order;
     double a = cos(M_PI * (upperCutoff + lowerCutoff) / SOUND_FREQUENCY) / cos(M_PI * (upperCutoff - lowerCutoff) / SOUND_FREQUENCY);
     double a2 = a * a;

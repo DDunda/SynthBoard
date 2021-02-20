@@ -7,6 +7,8 @@
 
 using namespace std;
 
+static ModuleRegistry soundRegistry;
+
 MakeModule(Sine)
 protected:
 	double t = 0;
@@ -15,7 +17,7 @@ public:
 	Input in_frequency;
 	SineOutput out_output;
 
-	Sine(Input frequency);
+	Sine(Input frequency, ModuleRegistry& registry = soundRegistry);
 };
 
 MakeModule(Square)
@@ -26,7 +28,7 @@ public:
 	Input in_frequency;
 	SquareOutput out_output;
 
-	Square(Input frequency);
+	Square(Input frequency, ModuleRegistry& registry = soundRegistry);
 };
 
 MakeModule(Sawtooth)
@@ -37,7 +39,7 @@ public:
 	Input in_frequency;
 	SawtoothOutput out_output;
 
-	Sawtooth(Input frequency);
+	Sawtooth(Input frequency, ModuleRegistry& registry = soundRegistry);
 };
 
 MakeModule(Triangle)
@@ -48,7 +50,7 @@ public:
 	Input in_frequency;
 	TriangleOutput out_output;
 
-	Triangle(Input frequency);
+	Triangle(Input frequency, ModuleRegistry& registry = soundRegistry);
 };
 
 MakeModule(Noise)
@@ -62,7 +64,7 @@ public:
 	Input in_frequency;
 	NoiseOutput out_output;
 
-	Noise(Input frequency);
+	Noise(Input frequency, ModuleRegistry& registry = soundRegistry);
 };
 
 MakeModule(SquarePulse)
@@ -74,7 +76,7 @@ public:
 	Input in_duty;
 	SquarePulseOutput out_output;
 
-	SquarePulse(Input input, Input duty);
+	SquarePulse(Input input, Input duty, ModuleRegistry& registry = soundRegistry);
 };
 
 MakeModule(TrianglePulse)
@@ -86,7 +88,7 @@ public:
 	Input in_duty;
 	TrianglePulseOutput out_output;
 
-	TrianglePulse(Input input, Input duty);
+	TrianglePulse(Input input, Input duty, ModuleRegistry& registry = soundRegistry);
 };
 
 MakeModule(Constant)
@@ -94,7 +96,7 @@ public:
 	double value = 0;
 	ConstantOutput out_output;
 
-	Constant(double value);
+	Constant(double value, ModuleRegistry& registry = soundRegistry);
 };
 
 MakeModule(Multiplier)
@@ -102,7 +104,7 @@ public:
 	vector<Input> in_sources;
 	MultiplierOutput out_output;
 
-	Multiplier(vector<Input> sources);
+	Multiplier(vector<Input> sources, ModuleRegistry& registry = soundRegistry);
 };
 
 MakeModule(Adder)
@@ -110,7 +112,7 @@ public:
 	vector<Input> in_sources;
 	AdderOutput out_output;
 
-	Adder(vector<Input> sources);
+	Adder(vector<Input> sources, ModuleRegistry& registry = soundRegistry);
 };
 
 MakeModule(Mapper)
@@ -120,7 +122,7 @@ public:
 	Input in_c;
 	MapperOutput out_output;
 	// out = m * in + c
-	Mapper(Input input, Input m, Input c);
+	Mapper(Input input, Input m, Input c, ModuleRegistry& registry = soundRegistry);
 };
 
 MakeModule(Flipper)
@@ -128,7 +130,7 @@ public:
 	Input in_input;
 	FlipperOutput out_output;
 
-	Flipper(Input input);
+	Flipper(Input input, ModuleRegistry& registry = soundRegistry);
 };
 
 MakeModule(Volume)
@@ -140,7 +142,7 @@ public:
 	Input in_targetVolume;
 	VolumeOutput out_output;
 
-	Volume(Input input, Input targetVolume);
+	Volume(Input input, Input targetVolume, ModuleRegistry& registry = soundRegistry);
 };
 
 MakeModule(Limiter)
@@ -152,7 +154,7 @@ public:
 	Input in_max;
 	LimiterOutput out_output;
 
-	Limiter(Input input, Input max);
+	Limiter(Input input, Input max, ModuleRegistry& registry = soundRegistry);
 };
 
 MakeModule(Fader)
@@ -167,7 +169,7 @@ public:
 	Input in_releaseRate;
 	FaderOutput out_output;
 
-	Fader(Input input, Input attack, Input release);
+	Fader(Input input, Input attack, Input release, ModuleRegistry& registry = soundRegistry);
 
 	void Stop();
 	void Start();
@@ -189,7 +191,7 @@ public:
 	Input in_cutoff;
 	LowPassOutput out_output;
 
-	LowPass(Input input, Input cutoff);
+	LowPass(Input input, Input cutoff, ModuleRegistry& registry = soundRegistry);
 
 	void SetCutoff(double cutoff);
 };
@@ -209,7 +211,7 @@ public:
 	Input in_cutoff;
 	HighPassOutput out_output;
 
-	HighPass(Input input, Input cutoff);
+	HighPass(Input input, Input cutoff, ModuleRegistry& registry = soundRegistry);
 
 	void SetCutoff(double cutoff);
 };
@@ -229,7 +231,7 @@ public:
 	Input in_echoDuration;
 	DelayOutput out_output;
 
-	Delay(Input input, Input duration, Input decay);
+	Delay(Input input, Input duration, Input decay, ModuleRegistry& registry = soundRegistry);
 	~Delay();
 };
 
@@ -239,7 +241,7 @@ public:
 	Input in_resolution;
 	BitCrusherOutput out_output;
 
-	BitCrusher(Input input, Input resolution);
+	BitCrusher(Input input, Input resolution, ModuleRegistry& registry = soundRegistry);
 };
 
 MakeModule(BitCrusher2)
@@ -248,5 +250,5 @@ public:
 	Input in_resolution;
 	BitCrusher2Output out_output;
 
-	BitCrusher2(Input input, Input resolution);
+	BitCrusher2(Input input, Input resolution, ModuleRegistry& registry = soundRegistry);
 };

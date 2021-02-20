@@ -47,7 +47,7 @@ void Slider::recalculateArea() {
 	setPosition(globalAnchorX, globalAnchorY);
 }
 
-void Slider::update() {
+void Slider::update(double dT) {
 	if (!inFocus() && !knobGrabbed) return;
 
 	SDL_Point a = {

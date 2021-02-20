@@ -9,6 +9,7 @@
 #include <math.h>
 
 #include "Module.h"
+#include "Sound.h"
 
 using namespace std;
 
@@ -27,7 +28,7 @@ public:
     Input in_input;
     LowPassButterOutput out_output;
 
-    LowPassButter(Input input, double cutoff, unsigned int strength);
+    LowPassButter(Input input, double cutoff, unsigned int strength, ModuleRegistry& registry = soundRegistry);
     ~LowPassButter();
 };
 
@@ -45,7 +46,7 @@ public:
     Input in_input;
     HighPassButterOutput out_output;
 
-    HighPassButter(Input input, double cutoff, unsigned int strength);
+    HighPassButter(Input input, double cutoff, unsigned int strength, ModuleRegistry& registry = soundRegistry);
     ~HighPassButter();
 };
 
@@ -68,7 +69,7 @@ public:
     Input in_input;
     BandPassButterOutput out_output;
 
-    BandPassButter(Input, double lowerCutoff, double upperCutoff, unsigned int strength);
+    BandPassButter(Input, double lowerCutoff, double upperCutoff, unsigned int strength, ModuleRegistry& registry = soundRegistry);
     ~BandPassButter();
 };
 
@@ -94,6 +95,6 @@ public:
     Input in_input;
     BandStopButterOutput out_output;
 
-    BandStopButter(Input, double lowerCutoff, double upperCutoff, unsigned int strength);
+    BandStopButter(Input, double lowerCutoff, double upperCutoff, unsigned int strength, ModuleRegistry& registry = soundRegistry);
     ~BandStopButter();
 };

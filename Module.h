@@ -5,33 +5,39 @@
 #include <algorithm>
 #include <iostream>
 
-class Module {
+class Module;
+
+class ModuleRegistry {
 private:
-	static std::vector<Module*> registry;
+	std::vector<Module*> modules;
+public:
+	SDL_mutex* lock;
+
+	ModuleRegistry();
+	~ModuleRegistry();
+	void Register(Module* module);
+	void Unregister(Module* module);
+	void MovePosition(Module* module, size_t position);
+	void CalculateAllModuleStates();
+	void PresentAllModuleStates();
+
+	void RegisterUnsafe(Module* module);
+	void UnregisterUnsafe(Module* module);
+	void MovePositionUnsafe(Module* module, size_t position);
+	void CalculateAllModuleStatesUnsafe();
+	void PresentAllModuleStatesUnsafe();
+};
+
+class Module {
+	friend class ModuleRegistry;
 protected:
 	virtual void CalculateState() = 0;
 	virtual void PresentState() = 0;
+	ModuleRegistry& parent;
 public:
 	static SDL_mutex* registryLock;
-	Module() {
-		registry.push_back(this);
-	}
-	~Module() {
-		Module* toFind = this;
-		//Module** pos = 
-		std::vector<Module*>::iterator it = std::find(registry.begin(), registry.end(), this);
-		if (it != registry.end()) {
-			Module* lastPtr = registry[registry.size() - 1];
-			*it = lastPtr;
-			registry.pop_back();
-		}
-	}
-	static void CalculateAllModuleStates() {
-		for (Module* m : registry) m->CalculateState();
-	}
-	static void PresentAllModuleStates() {
-		for (Module* m : registry) m->PresentState();
-	}
+	Module(ModuleRegistry& registry);
+	~Module();
 };
 
 template <class T>
@@ -48,14 +54,14 @@ public:
 	operator T() const { return frontValue; } // This is probably a bad idea
 };
 
+typedef Output<double>* Input;
 
-#define MakeModule(name) \
-class name : public Module {\
-	class name##Output : public Output<double> {\
-		friend name;\
-		name##Output(double d) : Output<double>(d) {}\
-	};\
+#define MakeModuleOutput(name) class name##Output : public Output<double> {\
+	friend class name;\
+	name##Output(double d) : Output<double>(d) {}\
+};
+#define MakeModule(name) class name : public Module {\
+MakeModuleOutput(name)\
+protected:\
 	void CalculateState();\
 	void PresentState();
-
-typedef Output<double>* Input;

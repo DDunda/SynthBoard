@@ -92,6 +92,9 @@
     <ClCompile Include="Filters.cpp">
       <Filter>Modules\Filters</Filter>
     </ClCompile>
+    <ClCompile Include="Waveform.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <CopyFileToFolders Include="SDL2_mixer\lib\x64\libFLAC-8.dll">
@@ -503,6 +506,9 @@
     </ClInclude>
     <ClInclude Include="Filters.h">
       <Filter>Modules\Filters</Filter>
+    </ClInclude>
+    <ClInclude Include="Waveform.h">
+      <Filter>Headers</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>
