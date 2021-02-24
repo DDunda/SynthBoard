@@ -1,24 +1,23 @@
 #include "RenderableElement.h"
-std::vector<RenderableElement*> RenderableElement::elements = std::vector<RenderableElement*>();
 
-RenderableElement::RenderableElement() {
-	elements.push_back(this);
-}
+RenderableRegistry RenderableRegistry::globalRegistry;
 
-RenderableElement::~RenderableElement() {
-	auto iter = std::find(elements.begin(), elements.end(), this);
-	if (iter != elements.end())
-		elements.erase(iter);
-}
-
-void RenderableElement::UpdateAllElements(double dT) {
-	for (RenderableElement* e : elements)
+void RenderableRegistry::UpdateAllElements(double dT) {
+	for (Renderable* e : entries)
 		if (e->active)
-			e->update(dT);
+			e->Update(dT);
+}
+void RenderableRegistry::RenderAllElements(SDL_Renderer* r) {
+	for (auto it = entries.rbegin(); it != entries.rend(); it++) { // Things at the front have to be drawn LAST
+		Renderable* e = *it;
+		if (e->visible)
+			e->Render(r);
+	}
 }
 
-void RenderableElement::RenderAllElements(SDL_Renderer* r) {
-	for (RenderableElement* e : elements)
-		if (e->visible)
-			e->render(r);
+Renderable::Renderable(RenderableRegistry& registry) : parent(registry) {
+	parent.Register(this);
+}
+Renderable::~Renderable() {
+	parent.Unregister(this);
 }

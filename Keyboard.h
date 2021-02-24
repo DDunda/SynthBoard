@@ -38,10 +38,10 @@ public:
 	void SetOctave(int o) {
 		SetFrequency(Octaves::OctaveSet[o]->notes[noteNum]);
 	}
-	void SetGenerator(Input i) {
+	void SetGenerator(Input<double> i) {
 		crusher.in_input = i;
 	}
-	Key(Keyboard& p, int octave, int number, SDL_Scancode keycode, Input res, ModuleRegistry& registry) : parent(p),
+	Key(Keyboard& p, int octave, int number, SDL_Scancode keycode, Input<double> res, ModuleRegistry& registry) : parent(p),
 		frequency(0.0, registry),
 		crusher(NULL, res, registry),
 		noteNum(number),
@@ -67,7 +67,7 @@ public:
 	}
 };
 
-class Keyboard : public RenderableElement {
+class Keyboard : public Renderable {
 protected:
 	ModuleRegistry& registry;
 
@@ -123,7 +123,7 @@ protected:
 	std::vector<Module*> keyGenerators;
 
 	Key& MakeKey(int o, int n, SDL_Scancode k) {
-		keys.push_back(new Key(*this, o, n, k, &resSlider.output, registry));
+		keys.push_back(new Key(*this, o, n, k, &resSlider.out_output, registry));
 		return *keys[keys.size()-1];
 	}
 
@@ -134,8 +134,9 @@ protected:
 	}
 
 	void SetSynths(unsigned synth) {
-		synth = synth % 7;
+		synth = synth % synthCount;
 		if (synth != selectedSynth) {
+			auto lock = ModuleRegistry::globalRegistry.Lock();
 			for (Module* m : keyGenerators) delete m;
 			keyGenerators.clear();
 			// Sine Triangle Square Sawtooth Noise
@@ -171,7 +172,7 @@ protected:
 				targetVolume.value = 1.0;
 				dutSlider.visible = true;
 				for (int i = 0; i < numOctaves * 12; i++) {
-					TrianglePulse* tmp = new TrianglePulse(&keys[i]->frequency.out_output, &dutSlider.output, registry);
+					TrianglePulse* tmp = new TrianglePulse(&keys[i]->frequency.out_output, &dutSlider.out_output, registry);
 					keys[i]->SetGenerator(&tmp->out_output);
 					keyGenerators.push_back(tmp);
 				}
@@ -180,7 +181,7 @@ protected:
 				targetVolume.value = 0.3;
 				dutSlider.visible = true;
 				for (int i = 0; i < numOctaves * 12; i++) {
-					SquarePulse* tmp = new SquarePulse(&keys[i]->frequency.out_output, &dutSlider.output, registry);
+					SquarePulse* tmp = new SquarePulse(&keys[i]->frequency.out_output, &dutSlider.out_output, registry);
 					keys[i]->SetGenerator(&tmp->out_output);
 					keyGenerators.push_back(tmp);
 				}
@@ -215,6 +216,7 @@ public:
 	static SDL_Scancode KeyMapping[36];
 	int firstOctave = 2;
 	int selectedSynth = -1;
+	const int synthCount = 7;
 
 	int borderThickness = 5;
 
@@ -224,9 +226,7 @@ public:
 
 	Output<double>* output;
 	
-	void update(double dT) {
-		onUpdate();
-
+	void Update(double dT) {
 		pianoScale = floor(screenWidth / 356);
 
 		renderArea = {
@@ -243,7 +243,7 @@ public:
 			}
 		}
 
-		if (keyReleased(SDLK_RIGHT)) {
+		if (keyPressed(SDLK_RIGHT)) {
 			if (firstOctave != 4) {
 				firstOctave++;
 				SetKeyFrequencies();
@@ -255,7 +255,7 @@ public:
 		}
 
 		if (keyPressed(SDLK_DOWN)) {
-			SetSynths((selectedSynth + 5) % 6);
+			SetSynths((selectedSynth + synthCount - 1) % synthCount);
 		}
 
 		bool blackKeyClicked = false;
@@ -300,7 +300,7 @@ public:
 			}
 		}
 	};
-	void render(SDL_Renderer* r) {
+	void Render(SDL_Renderer* r) {
 		if (keyTexture == NULL)	keyTexture = IMG_LoadTexture(r, "keys.png");
 
 		//borderThickness = renderArea.w / ((long long)numOctaves * 7 * 10);
@@ -375,21 +375,20 @@ public:
 				if ((blackNum % 7) == 2 || (blackNum % 7) == 6) blackNum++;
 			}
 		}*/
-
-		onRender(r);
 	};
 
-	Keyboard(ModuleRegistry& registry = soundRegistry) :
-		registry(registry),
-		adder({}, registry),
-		targetVolume(1.0, registry),
-		volume(&adder.out_output, &targetVolume.out_output, registry),
-		resSlider(0, 1, registry, 0),
+	Keyboard(ModuleRegistry& mRegistry = ModuleRegistry::globalRegistry, RenderableRegistry& rRegistry = RenderableRegistry::globalRegistry) :
+		Renderable(rRegistry),
+		registry(mRegistry),
+		adder({}, mRegistry),
+		targetVolume(1.0, mRegistry),
+		volume(&adder.out_output, &targetVolume.out_output, mRegistry),
+		resSlider(0, 1, 0 , mRegistry),
 		//crusher(&volume.out_output, &resSlider.output),
-		decSlider(0, 1, registry, 0.25),
-		durSlider(0, 1, registry, 0.25),
-		dutSlider(0, 1, registry, 0.25),
-		echo(&volume.out_output, &durSlider.output, &decSlider.output, registry),
+		decSlider(0, 1, 0.25, mRegistry),
+		durSlider(0, 1, 0.25, mRegistry),
+		dutSlider(0, 1, 0.25, mRegistry),
+		echo(&volume.out_output, &durSlider.out_output, &decSlider.out_output, mRegistry),
 		output(&echo.out_output) {
 		renderArea = { 0,screenHeight / 2, screenWidth, screenHeight / 2 };
 

@@ -1,29 +1,33 @@
 #include "InteractiveElement.h"
 
-std::vector<InteractiveElement*> InteractiveElement::interactiveElements = std::vector<InteractiveElement*>();
-InteractiveElement* InteractiveElement::focusedElement = NULL;
+InteractiveRegistry InteractiveRegistry::globalRegistry;
 
-InteractiveElement::InteractiveElement() {
-	interactiveElements.push_back(this);
-}
-InteractiveElement::~InteractiveElement() {
-	interactiveElements.erase(std::find(interactiveElements.begin(), interactiveElements.end(), this));
-}
+void InteractiveRegistry::UpdateElementFocus(int x, int y) {
+	Interactive* newFocus = NULL;
 
-void InteractiveElement::UpdateElementFocus() {
-	if (buttonPressed(SDL_BUTTON_LEFT)) {
-		InteractiveElement* lastFocus = focusedElement;
-		focusedElement = NULL;
+	for (auto e : entries)
+		if (e->InArea(x, y) && e->interactive) {
+			focusedElement = e;
+			break;
+		}
 
-		for (auto e : interactiveElements) if (e->inArea(mouseX, mouseY) && e->active) focusedElement = e;
-
-		if (lastFocus != focusedElement) {
-			if (lastFocus != NULL)	lastFocus->unfocus();
-			if (focusedElement != NULL)	focusedElement->focus();
+	if (newFocus != focusedElement) {
+		if (focusedElement != NULL) {
+			focusedElement->Unfocus();
+		}
+		focusedElement = newFocus;
+		if (focusedElement != NULL) {
+			focusedElement->Focus();
 		}
 	}
 }
+bool InteractiveRegistry::IsFocus(const Interactive* element) const {
+	return element == focusedElement;
+}
 
-bool InteractiveElement::inFocus() {
-	return this == focusedElement;
+Interactive::Interactive(InteractiveRegistry& interactiveRegistry) : parent(interactiveRegistry) {
+	parent.Register(this);
+}
+Interactive::~Interactive() {
+	parent.Unregister(this);
 }

@@ -30,70 +30,112 @@
     <Filter Include="Headers">
       <UniqueIdentifier>{1f0584c6-63a1-4da2-b1af-33bb2a93e3f4}</UniqueIdentifier>
     </Filter>
-    <Filter Include="Modules">
-      <UniqueIdentifier>{d981d46d-3023-4859-a18d-71b03a6bb68d}</UniqueIdentifier>
+    <Filter Include="Deprecated">
+      <UniqueIdentifier>{bfbf7fe2-e5f2-43ff-920c-8681906a3d56}</UniqueIdentifier>
     </Filter>
-    <Filter Include="Modules\Sound">
+    <Filter Include="Batchers">
+      <UniqueIdentifier>{7b6f395f-39f6-41b4-b4bb-2db3b5ccca3c}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Batchers\Objects">
+      <UniqueIdentifier>{02a21272-2960-4599-9101-702e7af76623}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Batchers\Objects\Sound">
       <UniqueIdentifier>{f59af00f-186b-499b-8a48-7c41e386b0cf}</UniqueIdentifier>
     </Filter>
-    <Filter Include="Modules\Filters">
+    <Filter Include="Batchers\Objects\Filters">
       <UniqueIdentifier>{707e3d8d-6bf8-4dbc-910c-793bb1fd2e6e}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Batchers\Objects\Input GUI">
+      <UniqueIdentifier>{ca7fde8f-6511-473c-a784-bb8dfe262b06}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Batchers\Objects\Input GUI\IntField">
+      <UniqueIdentifier>{900df7eb-6ba9-4643-97d3-7664e3c11571}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Batchers\Objects\Input GUI\FloatField">
+      <UniqueIdentifier>{5233e3b5-5187-4a2b-baf9-83f327ee3009}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Batchers\Objects\Input GUI\Slider">
+      <UniqueIdentifier>{4a96ff12-e520-4fd2-82da-0a20f1239a94}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Batchers\Objects\Input GUI\SimpleButton">
+      <UniqueIdentifier>{cb5c37ad-857e-43b9-bf6d-55c5d371ee83}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Batchers\Objects\Sound GUI">
+      <UniqueIdentifier>{c45de0af-d8d2-4c20-8481-c439fc00f13f}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Batchers\Objects\Sound GUI\Waveform">
+      <UniqueIdentifier>{92bb3c8c-0b39-4e87-b1fd-15c254ae16b9}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Batchers\Objects\Sound GUI\Keyboard">
+      <UniqueIdentifier>{3696cc3a-6fef-4793-9d4e-44b148286638}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Batchers\Objects\Input GUI\TextField">
+      <UniqueIdentifier>{ec5f3f06-ea25-40f1-977c-b03653bd3f07}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Batchers\Interactive">
+      <UniqueIdentifier>{0af05a77-7e35-410f-b794-a5b7616e13b1}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Batchers\Renderable">
+      <UniqueIdentifier>{1a590f49-4261-4aa3-a15c-54983cc26fa1}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Batchers\Module">
+      <UniqueIdentifier>{d981d46d-3023-4859-a18d-71b03a6bb68d}</UniqueIdentifier>
     </Filter>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="Input.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="FloatField.cpp">
-      <Filter>Source Files</Filter>
-    </ClCompile>
-    <ClCompile Include="IntField.cpp">
-      <Filter>Source Files</Filter>
-    </ClCompile>
-    <ClCompile Include="SimpleButton.cpp">
-      <Filter>Source Files</Filter>
-    </ClCompile>
     <ClCompile Include="main.cpp">
-      <Filter>Source Files</Filter>
-    </ClCompile>
-    <ClCompile Include="InteractiveElement.cpp">
-      <Filter>Source Files</Filter>
-    </ClCompile>
-    <ClCompile Include="RenderableElement.cpp">
-      <Filter>Source Files</Filter>
-    </ClCompile>
-    <ClCompile Include="TextField.cpp">
-      <Filter>Source Files</Filter>
-    </ClCompile>
-    <ClCompile Include="AbstractedAccess.cpp">
-      <Filter>Source Files</Filter>
-    </ClCompile>
-    <ClCompile Include="Keyboard.cpp">
-      <Filter>Source Files</Filter>
-    </ClCompile>
-    <ClCompile Include="Slider.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
     <ClCompile Include="Helpers.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="Sound_old.cpp">
-      <Filter>Source Files</Filter>
-    </ClCompile>
-    <ClCompile Include="SoundConstants.cpp">
-      <Filter>Source Files</Filter>
-    </ClCompile>
     <ClCompile Include="Module.cpp">
-      <Filter>Modules</Filter>
+      <Filter>Batchers\Module</Filter>
     </ClCompile>
     <ClCompile Include="Sound.cpp">
-      <Filter>Modules\Sound</Filter>
+      <Filter>Batchers\Objects\Sound</Filter>
     </ClCompile>
     <ClCompile Include="Filters.cpp">
-      <Filter>Modules\Filters</Filter>
+      <Filter>Batchers\Objects\Filters</Filter>
+    </ClCompile>
+    <ClCompile Include="RenderableElement.cpp">
+      <Filter>Batchers\Renderable</Filter>
+    </ClCompile>
+    <ClCompile Include="FloatField.cpp">
+      <Filter>Batchers\Objects\Input GUI\FloatField</Filter>
+    </ClCompile>
+    <ClCompile Include="IntField.cpp">
+      <Filter>Batchers\Objects\Input GUI\IntField</Filter>
+    </ClCompile>
+    <ClCompile Include="SimpleButton.cpp">
+      <Filter>Batchers\Objects\Input GUI\SimpleButton</Filter>
     </ClCompile>
     <ClCompile Include="Waveform.cpp">
-      <Filter>Source Files</Filter>
+      <Filter>Batchers\Objects\Sound GUI\Waveform</Filter>
+    </ClCompile>
+    <ClCompile Include="Keyboard.cpp">
+      <Filter>Batchers\Objects\Sound GUI\Keyboard</Filter>
+    </ClCompile>
+    <ClCompile Include="SoundConstants.cpp">
+      <Filter>Batchers\Objects\Sound</Filter>
+    </ClCompile>
+    <ClCompile Include="AbstractedAccess.cpp">
+      <Filter>Deprecated</Filter>
+    </ClCompile>
+    <ClCompile Include="Sound_old.cpp">
+      <Filter>Deprecated</Filter>
+    </ClCompile>
+    <ClCompile Include="TextField.cpp">
+      <Filter>Batchers\Objects\Input GUI\TextField</Filter>
+    </ClCompile>
+    <ClCompile Include="Slider.cpp">
+      <Filter>Batchers\Objects\Input GUI\Slider</Filter>
+    </ClCompile>
+    <ClCompile Include="InteractiveElement.cpp">
+      <Filter>Batchers\Interactive</Filter>
     </ClCompile>
   </ItemGroup>
   <ItemGroup>
@@ -456,59 +498,62 @@
     <ClInclude Include="SDL2\include\close_code.h">
       <Filter>Resources\SDL\SDL Headers</Filter>
     </ClInclude>
-    <ClInclude Include="TextField.h">
-      <Filter>Headers</Filter>
-    </ClInclude>
-    <ClInclude Include="AbstractedAccess.h">
-      <Filter>Headers</Filter>
-    </ClInclude>
-    <ClInclude Include="FloatField.h">
-      <Filter>Headers</Filter>
-    </ClInclude>
     <ClInclude Include="Input.h">
-      <Filter>Headers</Filter>
-    </ClInclude>
-    <ClInclude Include="InteractiveElement.h">
-      <Filter>Headers</Filter>
-    </ClInclude>
-    <ClInclude Include="IntField.h">
-      <Filter>Headers</Filter>
-    </ClInclude>
-    <ClInclude Include="Keyboard.h">
-      <Filter>Headers</Filter>
-    </ClInclude>
-    <ClInclude Include="RenderableElement.h">
-      <Filter>Headers</Filter>
-    </ClInclude>
-    <ClInclude Include="resource.h">
-      <Filter>Headers</Filter>
-    </ClInclude>
-    <ClInclude Include="SimpleButton.h">
       <Filter>Headers</Filter>
     </ClInclude>
     <ClInclude Include="Helpers.h">
       <Filter>Headers</Filter>
     </ClInclude>
-    <ClInclude Include="Sound_old.h">
-      <Filter>Headers</Filter>
-    </ClInclude>
-    <ClInclude Include="SoundConstants.h">
-      <Filter>Headers</Filter>
-    </ClInclude>
-    <ClInclude Include="Slider.h">
-      <Filter>Headers</Filter>
-    </ClInclude>
     <ClInclude Include="Module.h">
-      <Filter>Modules</Filter>
+      <Filter>Batchers\Module</Filter>
     </ClInclude>
     <ClInclude Include="Sound.h">
-      <Filter>Modules\Sound</Filter>
+      <Filter>Batchers\Objects\Sound</Filter>
     </ClInclude>
     <ClInclude Include="Filters.h">
-      <Filter>Modules\Filters</Filter>
+      <Filter>Batchers\Objects\Filters</Filter>
+    </ClInclude>
+    <ClInclude Include="RenderableElement.h">
+      <Filter>Batchers\Renderable</Filter>
+    </ClInclude>
+    <ClInclude Include="FloatField.h">
+      <Filter>Batchers\Objects\Input GUI\FloatField</Filter>
+    </ClInclude>
+    <ClInclude Include="IntField.h">
+      <Filter>Batchers\Objects\Input GUI\IntField</Filter>
+    </ClInclude>
+    <ClInclude Include="SimpleButton.h">
+      <Filter>Batchers\Objects\Input GUI\SimpleButton</Filter>
     </ClInclude>
     <ClInclude Include="Waveform.h">
-      <Filter>Headers</Filter>
+      <Filter>Batchers\Objects\Sound GUI\Waveform</Filter>
+    </ClInclude>
+    <ClInclude Include="Keyboard.h">
+      <Filter>Batchers\Objects\Sound GUI\Keyboard</Filter>
+    </ClInclude>
+    <ClInclude Include="SoundConstants.h">
+      <Filter>Batchers\Objects\Sound</Filter>
+    </ClInclude>
+    <ClInclude Include="AbstractedAccess.h">
+      <Filter>Deprecated</Filter>
+    </ClInclude>
+    <ClInclude Include="Sound_old.h">
+      <Filter>Deprecated</Filter>
+    </ClInclude>
+    <ClInclude Include="Batcher.h">
+      <Filter>Batchers</Filter>
+    </ClInclude>
+    <ClInclude Include="TextField.h">
+      <Filter>Batchers\Objects\Input GUI\TextField</Filter>
+    </ClInclude>
+    <ClInclude Include="Slider.h">
+      <Filter>Batchers\Objects\Input GUI\Slider</Filter>
+    </ClInclude>
+    <ClInclude Include="InteractiveElement.h">
+      <Filter>Batchers\Interactive</Filter>
+    </ClInclude>
+    <ClInclude Include="resource.h">
+      <Filter>Resources</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>

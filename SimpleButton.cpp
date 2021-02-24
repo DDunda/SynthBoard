@@ -43,29 +43,29 @@ void SimpleButton::setPosition(int x, int y) {
 
 // Dynamically running stuff
 
-void SimpleButton::update() {
+bool SimpleButton::CanLoseFocus() {
+	return !state;
+}
+
+void SimpleButton::Update(double dT) {
 	lastState = state;
-	if (!state && buttonDown(mouseButton) && inFocus()) {
-		onPress();
+	if (!state && buttonDown(mouseButton) && Interactive::parent.IsFocus(this)) {
 		state = true;
 	}
 	if (state && buttonUp(mouseButton)) {
-		onRelease();
 		state = false;
 	}
-
-	onUpdate();
 }
-void SimpleButton::render(SDL_Renderer* r) {
+void SimpleButton::Render(SDL_Renderer* r) {
 	if (state) SDL_SetRenderDrawColor(r, 193, 193, 193, 255);
 	else SDL_SetRenderDrawColor(r, 226, 226, 226, 255);
 	SDL_RenderFillRect(r, &area);
-
-	onRender(r);
 }
 
 // Checks if mouse is on button
 
-bool SimpleButton::inArea(int x, int y) {
+bool SimpleButton::InArea(int x, int y) const {
 	return inBounds(area, x, y);
 }
+
+SimpleButton::SimpleButton(InteractiveRegistry& iRegistry, RenderableRegistry& rRegistry) : Interactive(iRegistry), Renderable(rRegistry) {}

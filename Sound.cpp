@@ -1,7 +1,7 @@
 #include "Sound.h"
 #include "SoundConstants.h"
 
-Sine::Sine(Input f, ModuleRegistry& registry) : Module(registry), in_frequency(f), out_output(0.0) {}
+Sine::Sine(Input<double> f, ModuleRegistry& registry) : Module(registry), in_frequency(f), out_output(0.0) {}
 void Sine::CalculateState() {
 	t += *in_frequency / SOUND_FREQUENCY;
 	t = fmod(t, 1.0);
@@ -11,7 +11,7 @@ void Sine::PresentState() {
 	out_output.PresentValue();
 }
 
-Square::Square(Input f, ModuleRegistry& registry) : Module(registry), in_frequency(f), out_output(0.0) {}
+Square::Square(Input<double> f, ModuleRegistry& registry) : Module(registry), in_frequency(f), out_output(0.0) {}
 void Square::CalculateState() {
 	t += *in_frequency / SOUND_FREQUENCY;
 	t = fmod(t, 1.0);
@@ -21,7 +21,7 @@ void Square::PresentState() {
 	out_output.PresentValue();
 }
 
-Sawtooth::Sawtooth(Input f, ModuleRegistry& registry) : Module(registry), in_frequency(f), out_output(0.0) {}
+Sawtooth::Sawtooth(Input<double> f, ModuleRegistry& registry) : Module(registry), in_frequency(f), out_output(0.0) {}
 void Sawtooth::CalculateState() {
 	t += *in_frequency / SOUND_FREQUENCY;
 	t = fmod(t, 1.0);
@@ -31,7 +31,7 @@ void Sawtooth::PresentState() {
 	out_output.PresentValue();
 }
 
-Triangle::Triangle(Input f, ModuleRegistry& registry) : Module(registry), in_frequency(f), out_output(0.0) {}
+Triangle::Triangle(Input<double> f, ModuleRegistry& registry) : Module(registry), in_frequency(f), out_output(0.0) {}
 void Triangle::CalculateState() {
 	t += *in_frequency / SOUND_FREQUENCY;
 	t = fmod(t, 1.0);
@@ -53,7 +53,7 @@ void Triangle::PresentState() {
 	out_output.PresentValue();
 }
 
-SquarePulse::SquarePulse(Input f, Input d, ModuleRegistry& registry) : Module(registry), in_frequency(f), in_duty(d), out_output(0.0) {}
+SquarePulse::SquarePulse(Input<double> f, Input<double> d, ModuleRegistry& registry) : Module(registry), in_frequency(f), in_duty(d), out_output(0.0) {}
 void SquarePulse::CalculateState() {
 	t += *in_frequency / SOUND_FREQUENCY;
 	t = fmod(t, 1.0);
@@ -63,7 +63,7 @@ void SquarePulse::PresentState() {
 	out_output.PresentValue();
 }
 
-TrianglePulse::TrianglePulse(Input f, Input d, ModuleRegistry& registry) : Module(registry), in_frequency(f), in_duty(d), out_output(0.0) {}
+TrianglePulse::TrianglePulse(Input<double> f, Input<double> d, ModuleRegistry& registry) : Module(registry), in_frequency(f), in_duty(d), out_output(0.0) {}
 void TrianglePulse::CalculateState() {
 	t += *in_frequency / SOUND_FREQUENCY;
 	t = fmod(t, 1.0);
@@ -73,7 +73,7 @@ void TrianglePulse::PresentState() {
 	out_output.PresentValue();
 }
 
-Noise::Noise(Input frequency, ModuleRegistry& registry) : Module(registry), in_frequency(frequency), out_output(0.0) {}
+Noise::Noise(Input<double> frequency, ModuleRegistry& registry) : Module(registry), in_frequency(frequency), out_output(0.0) {}
 void Noise::SetRandomAmplitude() {
 	amplitude = roundf(rand() / (float)RAND_MAX) * 2 - 1;
 }
@@ -97,7 +97,7 @@ void Constant::PresentState() {
 	out_output.PresentValue();
 }
 
-Multiplier::Multiplier(vector<Input> sources, ModuleRegistry& registry) : Module(registry), in_sources(sources), out_output(0.0) {};
+Multiplier::Multiplier(vector<Input<double>> sources, ModuleRegistry& registry) : Module(registry), in_sources(sources), out_output(0.0) {};
 void Multiplier::CalculateState() {
 	double product = 1.0;
 	for (auto source : in_sources) product *= *source;
@@ -108,7 +108,7 @@ void Multiplier::PresentState() {
 	out_output.PresentValue();
 }
 
-Adder::Adder(vector<Input> sources, ModuleRegistry& registry) : Module(registry), in_sources(sources), out_output(0.0) {};
+Adder::Adder(vector<Input<double>> sources, ModuleRegistry& registry) : Module(registry), in_sources(sources), out_output(0.0) {};
 void Adder::CalculateState() {
 	double sum = 0.0;
 	for (auto source : in_sources) sum += *source;
@@ -119,7 +119,7 @@ void Adder::PresentState() {
 	out_output.PresentValue();
 }
 
-Mapper::Mapper(Input input, Input m, Input c, ModuleRegistry& registry) : Module(registry), in_input(input), in_m(m), in_c(c), out_output(0.0) {}
+Mapper::Mapper(Input<double> input, Input<double> m, Input<double> c, ModuleRegistry& registry) : Module(registry), in_input(input), in_m(m), in_c(c), out_output(0.0) {}
 void Mapper::CalculateState() {
 	out_output.backValue = *in_input * *in_m + *in_c;
 }
@@ -127,7 +127,7 @@ void Mapper::PresentState() {
 	out_output.PresentValue();
 }
 
-Flipper::Flipper(Input input, ModuleRegistry& registry) : Module(registry), in_input(input), out_output(0.0) {}
+Flipper::Flipper(Input<double> input, ModuleRegistry& registry) : Module(registry), in_input(input), out_output(0.0) {}
 void Flipper::CalculateState() {
 	out_output.backValue = -*in_input;
 }
@@ -135,7 +135,7 @@ void Flipper::PresentState() {
 	out_output.PresentValue();
 }
 
-Volume::Volume(Input input, Input targetVolume, ModuleRegistry& registry) : Module(registry), in_input(input), in_targetVolume(targetVolume), out_output(0.0) {}
+Volume::Volume(Input<double> input, Input<double> targetVolume, ModuleRegistry& registry) : Module(registry), in_input(input), in_targetVolume(targetVolume), out_output(0.0) {}
 void Volume::CalculateState() {
 	internalVolume = (internalVolume * 9.0f + *in_targetVolume) / 10.0f;
 	out_output.backValue = *in_input * internalVolume;
@@ -144,7 +144,7 @@ void Volume::PresentState() {
 	out_output.PresentValue();
 }
 
-Limiter::Limiter(Input input, Input max, ModuleRegistry& registry) : Module(registry), in_input(input), in_max(max), out_output(0.0) {}
+Limiter::Limiter(Input<double> input, Input<double> max, ModuleRegistry& registry) : Module(registry), in_input(input), in_max(max), out_output(0.0) {}
 void Limiter::CalculateState() {
 	double sample = *in_input;
 	double max = abs(*in_max);
@@ -156,7 +156,7 @@ void Limiter::PresentState() {
 	out_output.PresentValue();
 }
 
-Fader::Fader(Input input, Input attack, Input release, ModuleRegistry& registry) : Module(registry), in_input(input), in_attackRate(attack), in_releaseRate(release), out_output(0.0) {}
+Fader::Fader(Input<double> input, Input<double> attack, Input<double> release, ModuleRegistry& registry) : Module(registry), in_input(input), in_attackRate(attack), in_releaseRate(release), out_output(0.0) {}
 void Fader::Stop() {
 	if (state == true) {
 		state = false;
@@ -198,7 +198,7 @@ void Fader::PresentState() {
 	out_output.PresentValue();
 }
 
-LowPass::LowPass(Input input, Input cutoff, ModuleRegistry& registry) : Module(registry), in_input(input), in_cutoff(cutoff), out_output(0.0) {
+LowPass::LowPass(Input<double> input, Input<double> cutoff, ModuleRegistry& registry) : Module(registry), in_input(input), in_cutoff(cutoff), out_output(0.0) {
 	SetCutoff(*cutoff);
 }
 void LowPass::SetCutoff(double cutoff) {
@@ -216,7 +216,7 @@ void LowPass::PresentState() {
 	out_output.PresentValue();
 }
 
-HighPass::HighPass(Input input, Input cutoff, ModuleRegistry& registry) : Module(registry), in_input(input), in_cutoff(cutoff), out_output(0.0) {
+HighPass::HighPass(Input<double> input, Input<double> cutoff, ModuleRegistry& registry) : Module(registry), in_input(input), in_cutoff(cutoff), out_output(0.0) {
 	SetCutoff(*cutoff);
 }
 void HighPass::SetCutoff(double cutoff) {
@@ -235,7 +235,7 @@ void HighPass::PresentState() {
 	out_output.PresentValue();
 }
 
-Delay::Delay(Input input, Input duration, Input decay, ModuleRegistry& registry) : Module(registry), in_input(input), in_echoDuration(duration), in_decayRate(decay), out_output(0.0) {}
+Delay::Delay(Input<double> input, Input<double> duration, Input<double> decay, ModuleRegistry& registry) : Module(registry), in_input(input), in_echoDuration(duration), in_decayRate(decay), out_output(0.0) {}
 Delay::~Delay() {
 	if(bufferStart) delete[] bufferStart;
 }
@@ -316,7 +316,7 @@ void Delay::PresentState() {
 	out_output.PresentValue();
 }
 
-BitCrusher::BitCrusher(Input input, Input resolution, ModuleRegistry& registry) : Module(registry), in_input(input), in_resolution(resolution), out_output(0.0) {}
+BitCrusher::BitCrusher(Input<double> input, Input<double> resolution, ModuleRegistry& registry) : Module(registry), in_input(input), in_resolution(resolution), out_output(0.0) {}
 void BitCrusher::CalculateState() {
 	if (*in_resolution <= 0) out_output.backValue = *in_input;
 	else out_output.backValue = round(*in_input / *in_resolution) * *in_resolution;
@@ -325,7 +325,7 @@ void BitCrusher::PresentState() {
 	out_output.PresentValue();
 }
 
-BitCrusher2::BitCrusher2(Input input, Input resolution, ModuleRegistry& registry) : Module(registry), in_input(input), in_resolution(resolution), out_output(0.0) {}
+BitCrusher2::BitCrusher2(Input<double> input, Input<double> resolution, ModuleRegistry& registry) : Module(registry), in_input(input), in_resolution(resolution), out_output(0.0) {}
 void BitCrusher2::CalculateState() {
 	if (*in_resolution <= 0) out_output.backValue = *in_input;
 	else out_output.backValue = (round(*in_input / *in_resolution + 0.5) - 0.5) * *in_resolution;

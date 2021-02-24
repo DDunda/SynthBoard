@@ -25,10 +25,10 @@ protected:
     double* w2;
 
 public:
-    Input in_input;
-    LowPassButterOutput out_output;
+    Input<double> in_input;
+    LowPassButterOutput<double> out_output;
 
-    LowPassButter(Input input, double cutoff, unsigned int strength, ModuleRegistry& registry = soundRegistry);
+    LowPassButter(Input<double> input, double cutoff, unsigned int strength, ModuleRegistry& registry = ModuleRegistry::globalRegistry);
     ~LowPassButter();
 };
 
@@ -43,10 +43,10 @@ protected:
     double* w1;
     double* w2;
 public:
-    Input in_input;
-    HighPassButterOutput out_output;
+    Input<double> in_input;
+    HighPassButterOutput<double> out_output;
 
-    HighPassButter(Input input, double cutoff, unsigned int strength, ModuleRegistry& registry = soundRegistry);
+    HighPassButter(Input<double> input, double cutoff, unsigned int strength, ModuleRegistry& registry = ModuleRegistry::globalRegistry);
     ~HighPassButter();
 };
 
@@ -66,10 +66,10 @@ protected:
     double* w4;
 
 public:
-    Input in_input;
-    BandPassButterOutput out_output;
+    Input<double> in_input;
+    BandPassButterOutput<double> out_output;
 
-    BandPassButter(Input, double lowerCutoff, double upperCutoff, unsigned int strength, ModuleRegistry& registry = soundRegistry);
+    BandPassButter(Input<double>, double lowerCutoff, double upperCutoff, unsigned int strength, ModuleRegistry& registry = ModuleRegistry::globalRegistry);
     ~BandPassButter();
 };
 
@@ -92,9 +92,9 @@ protected:
     double* w4;
 
 public:
-    Input in_input;
-    BandStopButterOutput out_output;
+    Input<double> in_input;
+    BandStopButterOutput<double> out_output;
 
-    BandStopButter(Input, double lowerCutoff, double upperCutoff, unsigned int strength, ModuleRegistry& registry = soundRegistry);
+    BandStopButter(Input<double>, double lowerCutoff, double upperCutoff, unsigned int strength, ModuleRegistry& registry = ModuleRegistry::globalRegistry);
     ~BandStopButter();
 };

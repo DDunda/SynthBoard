@@ -33,7 +33,7 @@ float deltaTime;
 
 bool soundRunning = true;
 
-Input waveOutput;
+Input<double> waveOutput;
 SDL_Renderer* renderer = NULL;
 SDL_Window* window = NULL;
 
@@ -79,7 +79,7 @@ void initialiseSDL() {
 Slider* volSlider;
 
 void SetupVolSlider() {
-	volSlider = new Slider(0.0f, 1.0f, soundRegistry, 0.05f);
+	volSlider = new Slider(0.0f, 1.0f, 0.05f);
 	volSlider->setPosition(25, 27);
 	volSlider->setSliderWidth(100);
 	volSlider->setKnobRadius(5);
@@ -100,7 +100,7 @@ int main(int argc, char* argv[]) {
 
 	Keyboard board;
 
-	Volume volMod(board.output, &volSlider->output);
+	Volume volMod(board.output, &volSlider->out_output);
 
 	Constant decay(1000.0);
 	Fader fader(
@@ -134,10 +134,14 @@ int main(int argc, char* argv[]) {
 
 		SDL_SetRenderDrawColor(renderer, 0, 0, 0, 255);
 		SDL_RenderClear(renderer);
-
-		InteractiveElement::UpdateElementFocus();
-		RenderableElement::UpdateAllElements(deltaTime);
-		Updater::updateAllSources();
+		{
+			auto lock = InteractiveRegistry::globalRegistry.Lock();
+			InteractiveRegistry::globalRegistry.UpdateElementFocus(mouseX, mouseY);
+		}
+		{
+			auto lock = RenderableRegistry::globalRegistry.Lock();
+			RenderableRegistry::globalRegistry.UpdateAllElements(deltaTime);
+		}
 
 		/*for (int i = 0; i < harmonics; i++) {
 			*volumes[i]->targetVolume = 
@@ -153,8 +157,10 @@ int main(int argc, char* argv[]) {
 			soundRunning = false;
 
 		waveform.drawArea = { 0,0,screenWidth, screenHeight - board.renderArea.h };
-
-		RenderableElement::RenderAllElements(renderer);
+		{
+			auto lock = RenderableRegistry::globalRegistry.Lock();
+			RenderableRegistry::globalRegistry.RenderAllElements(renderer);
+		}
 		SDL_RenderPresent(renderer);
 
 		int frameEnd = SDL_GetTicks();
@@ -182,16 +188,15 @@ int main(int argc, char* argv[]) {
 void PushAudio(void* userdata, Uint8* stream, int len) {
 	int numSamples = len / sizeof(Sint32);
 	if (waveOutput != NULL) {
-		SDL_LockMutex(soundRegistry.lock);
+		auto lock = ModuleRegistry::globalRegistry.Lock();
 		for (int i = 0; i < numSamples; i++) {
-			soundRegistry.CalculateAllModuleStatesUnsafe();
-			soundRegistry.PresentAllModuleStatesUnsafe();
+			ModuleRegistry::globalRegistry.CalculateAllStates();
+			ModuleRegistry::globalRegistry.PresentAllStates();
 			Sint64 t = *waveOutput * (Sint64)0x80000000;
 			if (t > SDL_MAX_SINT32) t = SDL_MAX_SINT32;
 			if (t < SDL_MIN_SINT32) t = SDL_MIN_SINT32;
 			soundBuffer[i] = t;
 		}
-		SDL_UnlockMutex(soundRegistry.lock);
 	}
 	else {
 		for (int i = 0; i < numSamples; i++) {

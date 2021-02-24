@@ -3,38 +3,35 @@
 #ifndef RENDERABLE_ELEMENTS
 #define RENDERABLE_ELEMENTS
 #include <SDL.h>
-#include <vector>
-#include <algorithm>
+#include "Batcher.h"
 
-class RenderableElement;
-
-typedef void(*callback)(RenderableElement*);
+class Renderable;
 
 struct padding {
 	int top = 0, right = 0, bottom = 0, left = 0;
 };
 
-class RenderableElement {
+class RenderableRegistry : public BatchRegistry<Renderable> {
+public:
+	void UpdateAllElements(double);
+	void RenderAllElements(SDL_Renderer*);
+
+	static RenderableRegistry globalRegistry;
+};
+
+class Renderable {
+	friend class RenderableRegistry;
 protected:
-	static std::vector<RenderableElement*> elements;
+	virtual void Update(double) {};
+	virtual void Render(SDL_Renderer*) {};
+
+	RenderableRegistry& parent;
 
 public:
 	bool active = true;
 	bool visible = true;
 
-	RenderableElement();
-	~RenderableElement();
-
-	// Called after the button is updated
-	virtual void onUpdate() {};
-	// Called after the button is rendered
-	virtual void onRender(SDL_Renderer*) {};
-
-	virtual void update(double) = 0;
-	virtual void render(SDL_Renderer*) = 0;
-
-	static void UpdateAllElements(double);
-	static void RenderAllElements(SDL_Renderer*);
+	Renderable(RenderableRegistry& registry);
+	~Renderable();
 };
-
 #endif

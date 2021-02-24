@@ -3,47 +3,55 @@
 #ifndef INT_FIELD
 #define INT_FIELD
 
-#include "InteractiveElement.h"
 #include "Input.h"
+#include "InteractiveElement.h"
+#include "RenderableElement.h"
+#include "Module.h"
 
-class IntField : public InteractiveElement
+class IntField : public Module, public Interactive, public Renderable
 {
+	MakeModuleOutput(IntField)
 private:
 	int visibleCharacters = 5;
-	int dstDigitSize;
-	int digitGap;
-	padding pad;
-	float anchorX, anchorY;
-	SDL_Rect area;
+	int dstDigitSize = 8;
+	int digitGap = 2;
+	padding pad = {0,0,0,0};
+	float anchorX = 0, anchorY = 0;
+	SDL_Rect area = {0,0,0,0};
+	bool typing = false;
+	std::string capturedData = "0";
+
+protected:
+	void startTyping();
+	void stopTyping();
+	void PresentState();
+	void Update(double);
+	void Render(SDL_Renderer*);
 
 public:
-	std::string capturedData;
 	int maxData = -1;
-	int caret = 0; // The line thingy
-	int output = NULL;
+	size_t caret = 0; // The line thingy
 
-	SDL_Texture* digits;
-	int srcDigitSize;
+	SDL_Texture* digits = NULL;
+	int srcDigitSize = 8;
 
 	int flashCycleStart = 0;
 	int flashCycle = 500;
 
-	IntField() : InteractiveElement() {}
-
+	IntFieldOutput<int> out_output;
 
 	void recalculateArea();
 
-	void focus();
-	void unfocus();
-
 	void setAnchor(float aX, float aY);
 	void setPosition(int x, int y);
+	void setPadding(padding pad);
 	void setVisibleCharacters(int size);
 	void setDigitSize(int size);
 	void setDigitGap(int size);
 
-	void update();
-	void render(SDL_Renderer* renderer);
+	bool InArea(int x, int y) const;
+
+	IntField(ModuleRegistry& mRegistry = ModuleRegistry::globalRegistry, InteractiveRegistry& iRegistry = InteractiveRegistry::globalRegistry, RenderableRegistry& rRegistry = RenderableRegistry::globalRegistry);
 };
 
 #endif

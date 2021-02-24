@@ -5,25 +5,32 @@
 
 #include "Input.h"
 #include "InteractiveElement.h"
-#include "AbstractedAccess.h"
+#include "RenderableElement.h"
+#include "Module.h"
 
-class TextField;
-
-class TextField : public Source<std::string>, public InteractiveElement
+class TextField : public Module, public Interactive, public Renderable
 {
+	MakeModuleOutput(TextField)
 private:
 	int visibleCharacters = 5;
 	int dstCharacterSize = 8;
 	int characterGap = 2;
-	padding pad;
+	padding pad = {0,0,0,0};
 	float anchorX = 0, anchorY = 0;
-	SDL_Rect area;
+	SDL_Rect area = {0,0,0,0};
+	bool typing = false;
+	std::string capturedData = "";
+
+protected:
+	void startTyping();
+	void stopTyping();
+	void PresentState();
+	void Update(double);
+	void Render(SDL_Renderer*);
 
 public:
-
-	std::string capturedData = "";
 	int maxData = -1;
-	int caret = 0; // The cursor thingy
+	size_t caret = 0; // The cursor thingy
 
 	SDL_Texture* characters = NULL;
 	int srcCharacterSize = 8;
@@ -31,46 +38,20 @@ public:
 	int flashCycleStart = 0;
 	int flashCycle = 500;
 
-	std::string Get();
-	void reset();
-
-	TextField() : InteractiveElement() {}
-
-	void setAnchor(float aX, float aY);
-	void setPosition(int x, int y);
+	TextFieldOutput<std::string> out_output;
 
 	void recalculateArea();
 
-	void focus();
-	void unfocus();
+	void setAnchor(float aX, float aY);
+	void setPosition(int x, int y);
+	void setPadding(padding pad);
+	void setVisibleCharacters(int size);
+	void setCharacterSize(int size);
+	void setCharacterGap(int size);
 
-	void setValue(const std::string&);
-	void setVisibleCharacters(int size) {
-		if (size <= 0) return;
+	bool InArea(int x, int y) const;
 
-		visibleCharacters = size;
-		recalculateArea();
-	}
-	void setCharacterSize(int size) {
-		if (size <= 0) return;
-
-		dstCharacterSize = size;
-		recalculateArea();
-	}
-	void setCharacterGap(int size) {
-		if (size < 0) return;
-
-		characterGap = size;
-		recalculateArea();
-	}
-	void setPadding(padding pad) {
-		this->pad = pad;
-
-		recalculateArea();
-	}
-
-	void update();
-	void render(SDL_Renderer* renderer);
+	TextField(ModuleRegistry& mRegistry = ModuleRegistry::globalRegistry, InteractiveRegistry& iRegistry = InteractiveRegistry::globalRegistry, RenderableRegistry& rRegistry = RenderableRegistry::globalRegistry);
 };
 
 #endif

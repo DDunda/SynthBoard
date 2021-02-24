@@ -27,23 +27,20 @@ static std::map<SDL_Keycode, char> numberKeymapping
 	{SDLK_KP_9,'9'}
 };
 
-
-void FloatField::recalculateArea() {
-	float globalAnchorX = area.x + area.w * anchorX;
-	float globalAnchorY = area.y + area.h * anchorY;
-
-	area.w = visibleCharacters * dstDigitSize + (visibleCharacters - 1) * digitGap + pad.left + pad.right;
-	area.h = dstDigitSize + pad.top + pad.bottom;
-
-	setPosition(globalAnchorX, globalAnchorY);
-}
-
-void FloatField::focus() {
-	//keyboardPipe = &keyPipe;
+void FloatField::startTyping() {
 	flashCycleStart = currentTime;
+
+	int caretsX = area.x + pad.left + dstDigitSize * 0.5f;
+	int careteX = area.x + pad.left + dstDigitSize * 0.5f + (std::min(visibleCharacters, (int)capturedData.size()) - 1) * (dstDigitSize + digitGap);
+
+	if (mouseX <= caretsX)
+		caret = 0;
+	else if (mouseX > careteX)
+		caret = capturedData.size();
+	else
+		caret = (mouseX - dstDigitSize * 0.5 - area.x - pad.left) / ((long long)dstDigitSize + digitGap) + 1LL;
 }
-void FloatField::unfocus() {
-	//keyboardPipe = &globalKeyboard;
+void FloatField::stopTyping() {
 	if (!capturedData.empty()) {
 		try
 		{
@@ -59,85 +56,21 @@ void FloatField::unfocus() {
 	}
 }
 
-void FloatField::setValue(float v) {
-	output = v;
-	capturedData = std::to_string(v);
-
-	isNegative = v < 0;
-
-	has_decimal = true;
-
-	if (maxData != -1)
-		capturedData.erase(maxData, capturedData.size() - maxData);
-
-	for (long long i = (long long)capturedData.size() - 1; i >= 0; i--) {
-		if (capturedData[i] == '.') {
-			capturedData.erase(i, capturedData.size() - i);
-			has_decimal = false;
-			break;
-		}
-		else if (capturedData[i] != '0') {
-			capturedData.erase(i + 1, capturedData.size() - i - 1);
-			break;
-		}
+void FloatField::PresentState() {
+	out_output.PresentValue();
+}
+void FloatField::Update(double dT) {
+	if (!typing && buttonReleased(SDL_BUTTON_LEFT) && Interactive::parent.IsFocus(this)) {
+		startTyping();
 	}
-
-	if (caret > capturedData.size())
-		caret = capturedData.size();
-}
-
-void FloatField::setPosition(int x, int y) {
-	area.x = x - area.w * anchorX;
-	area.y = y - area.h * anchorY;
-}
-void FloatField::setAnchor(float aX, float aY) {
-	int posX = area.x + area.w * anchorX;
-	int posY = area.y + area.h * anchorY;
-
-	anchorX = aX;
-	anchorY = aY;
-
-	setPosition(posX, posY);
-}
-void FloatField::setVisibleCharacters(int size) {
-	if (size <= 0) return;
-
-	visibleCharacters = size;
-	recalculateArea();
-}
-void FloatField::setDigitSize(int size) {
-	if (size <= 0) return;
-
-	dstDigitSize = size;
-	recalculateArea();
-}
-void FloatField::setDigitGap(int size) {
-	if (size < 0) return;
-
-	digitGap = size;
-	recalculateArea();
-}
-void FloatField::setPadding(padding pad) {
-	this->pad = pad;
-
-	recalculateArea();
-}
-
-void FloatField::update() {
-	if (inFocus()) {
-		if (buttonPressed(SDL_BUTTON_LEFT)) {
-			int caretsX = area.x + pad.left + dstDigitSize * 0.5f;
-			int careteX = area.x + pad.left + dstDigitSize * 0.5f + (std::min(visibleCharacters, (int)capturedData.size()) - 1) * (dstDigitSize + digitGap);
-
-			if (mouseX <= caretsX)
-				caret = 0;
-			else if (mouseX > careteX)
-				caret = capturedData.size();
-			else
-				caret = (mouseX - dstDigitSize * 0.5 - area.x - pad.left) / ((long long)dstDigitSize + digitGap) + 1LL;
-		}
-
+	if (typing && buttonReleased(SDL_BUTTON_LEFT) && !Interactive::parent.IsFocus(this)) {
+		stopTyping();
+	}
+	if (typing) {
 		for (auto keypair : globalKeyboard.keys_keycode) {
+			bool inputResolved = false;
+			if (!typing) break;
+			if (!keyPressed(keypair.first)) continue;
 			if (keyPressed(keypair.first)) {
 				if (numberKeymapping.count(keypair.first)) { // Key just corresponds to a character - no special behaviour
 					if (maxData == -1 || capturedData.size() < maxData) {
@@ -148,8 +81,10 @@ void FloatField::update() {
 						flashCycleStart = currentTime;
 						caret++;
 					}
+					inputResolved = true;
 				}
 				else { // Special characters
+					inputResolved = true;
 					switch (keypair.first)
 					{
 					case SDLK_BACKSPACE:
@@ -221,22 +156,27 @@ void FloatField::update() {
 
 					case SDLK_RETURN:
 						caret = capturedData.size();
-						unfocus();
+						stopTyping();
 						break;
+
+					default:
+						inputResolved = false;
 					}
 				}
+				if (inputResolved)
+					flashCycleStart = currentTime;
 			}
 		}
 	}
 }
-void FloatField::render(SDL_Renderer* renderer) {
+void FloatField::Render(SDL_Renderer* renderer) {
 	SDL_SetRenderDrawColor(renderer, 45, 40, 38, 255);
 	SDL_RenderFillRect(renderer, &area);
 	SDL_SetRenderDrawColor(renderer, 206, 228, 234, 255);
 	SDL_RenderDrawRect(renderer, &area);
 
 	int start, end;
-	if (inFocus()) {
+	if (typing) {
 		end = caret;
 		if (end < visibleCharacters) end = visibleCharacters;
 		if (end > capturedData.size()) end = capturedData.size();
@@ -245,7 +185,6 @@ void FloatField::render(SDL_Renderer* renderer) {
 		if (start < 0) start = 0;
 	}
 	else {
-		setValue(output);
 		start = 0;
 		end = visibleCharacters;
 		if (visibleCharacters > capturedData.size()) end = capturedData.size();
@@ -307,7 +246,7 @@ void FloatField::render(SDL_Renderer* renderer) {
 		};
 		SDL_RenderCopy(renderer, digits, &src, &dst);
 	}
-	if (inFocus() && (currentTime - flashCycleStart) % (flashCycle * 2) < flashCycle) {
+	if (typing && (currentTime - flashCycleStart) % (flashCycle * 2) < flashCycle) {
 		if (caret >= visibleCharacters) {
 			SDL_RenderDrawLine(renderer,
 				area.x + pad.left + (dstDigitSize + digitGap) * visibleCharacters - digitGap / 2,
@@ -327,11 +266,82 @@ void FloatField::render(SDL_Renderer* renderer) {
 	}
 }
 
-float FloatField::Get() {
-	return output;
-}
-void FloatField::reset() {}
+void FloatField::recalculateArea() {
+	float globalAnchorX = area.x + area.w * anchorX;
+	float globalAnchorY = area.y + area.h * anchorY;
 
-bool FloatField::inArea(int x, int y) {
+	area.w = visibleCharacters * dstDigitSize + (visibleCharacters - 1) * digitGap + pad.left + pad.right;
+	area.h = dstDigitSize + pad.top + pad.bottom;
+
+	setPosition(globalAnchorX, globalAnchorY);
+}
+void FloatField::setValue(double v) {
+	capturedData = std::to_string(v);
+
+	isNegative = v < 0;
+
+	has_decimal = true;
+
+	if (maxData != -1)
+		capturedData.erase(maxData, capturedData.size() - maxData);
+
+	if (v != 0) {
+		for (size_t i = capturedData.size() - 1; i > 0; i--) {
+			if (capturedData[i] == '.') {
+				capturedData.erase(i, capturedData.size() - i);
+				has_decimal = false;
+				break;
+			}
+			else if (capturedData[i] != '0') {
+				capturedData.erase(i + 1, capturedData.size() - i - 1);
+				break;
+			}
+		}
+	}
+
+	if (caret > capturedData.size())
+		caret = capturedData.size();
+
+	out_output.backValue = stof(capturedData);
+}
+
+void FloatField::setAnchor(float aX, float aY) {
+	int posX = area.x + area.w * anchorX;
+	int posY = area.y + area.h * anchorY;
+
+	anchorX = aX;
+	anchorY = aY;
+
+	setPosition(posX, posY);
+}
+void FloatField::setPosition(int x, int y) {
+	area.x = x - area.w * anchorX;
+	area.y = y - area.h * anchorY;
+}
+void FloatField::setVisibleCharacters(int size) {
+	if (size <= 0) return;
+
+	visibleCharacters = size;
+	recalculateArea();
+}
+void FloatField::setDigitSize(int size) {
+	if (size <= 0) return;
+
+	dstDigitSize = size;
+	recalculateArea();
+}
+void FloatField::setDigitGap(int size) {
+	if (size < 0) return;
+
+	digitGap = size;
+	recalculateArea();
+}
+void FloatField::setPadding(padding pad) {
+	this->pad = pad;
+
+	recalculateArea();
+}
+
+bool FloatField::InArea(int x, int y) const {
 	return inBounds(area, x, y);
 }

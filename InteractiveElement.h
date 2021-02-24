@@ -2,37 +2,39 @@
 
 #ifndef INTERACTIVE_ELEMENTS
 #define INTERACTIVE_ELEMENTS
+#include "Batcher.h"
 
-#include "Input.h"
-#include "RenderableElement.h"
+class Interactive;
 
-class InteractiveElement : public RenderableElement
-{
+class InteractiveRegistry : public BatchRegistry<Interactive> {
 private:
-	// All the elements that can be interacted with the mouse, at the very least
-	// The order of elements in this list determines the drawing order
-	static std::vector<InteractiveElement*> interactiveElements;
-	// The element the mouse is on
-	static InteractiveElement* focusedElement;
-	
+	Interactive* focusedElement = NULL;
 public:
-	// Visible
-	bool active = true;
-
-	InteractiveElement();
-	~InteractiveElement();
-
-	// Called when the element gains focus
-	virtual void focus() {};
-	// Called when the element loses focus
-	virtual void unfocus() {};
-
-	// Checks if point is on the element
-	virtual bool inArea(int x, int y) = 0;
 	// Recalculates what element the mouse is on - to be called each frame
-	static void UpdateElementFocus();
-	// An element comes into "focus" when the mouse is in this area
-	bool inFocus();
+	void UpdateElementFocus(int x, int y);
+	bool IsFocus(const Interactive*) const;
+
+	static InteractiveRegistry globalRegistry;
 };
 
+class Interactive
+{
+	friend class InteractiveRegistry;
+protected:
+	// Called when the element gains focus
+	virtual void Focus() {};
+	// Called when the element loses focus
+	virtual void Unfocus() {};
+
+	InteractiveRegistry& parent;
+
+public:
+	bool interactive = true;
+
+	Interactive(InteractiveRegistry& registry);
+	~Interactive();
+
+	// Checks if point is on the element
+	virtual bool InArea(int x, int y) const = 0;
+};
 #endif

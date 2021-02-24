@@ -7,17 +7,15 @@
 
 using namespace std;
 
-static ModuleRegistry soundRegistry;
-
 MakeModule(Sine)
 protected:
 	double t = 0;
 
 public:
-	Input in_frequency;
-	SineOutput out_output;
+	Input<double> in_frequency;
+	SineOutput<double> out_output;
 
-	Sine(Input frequency, ModuleRegistry& registry = soundRegistry);
+	Sine(Input<double> frequency, ModuleRegistry& registry = ModuleRegistry::globalRegistry);
 };
 
 MakeModule(Square)
@@ -25,10 +23,10 @@ protected:
 	double t = 0;
 
 public:
-	Input in_frequency;
-	SquareOutput out_output;
+	Input<double> in_frequency;
+	SquareOutput<double> out_output;
 
-	Square(Input frequency, ModuleRegistry& registry = soundRegistry);
+	Square(Input<double> frequency, ModuleRegistry& registry = ModuleRegistry::globalRegistry);
 };
 
 MakeModule(Sawtooth)
@@ -36,10 +34,10 @@ protected:
 	double t = 0;
 
 public:
-	Input in_frequency;
-	SawtoothOutput out_output;
+	Input<double> in_frequency;
+	SawtoothOutput<double> out_output;
 
-	Sawtooth(Input frequency, ModuleRegistry& registry = soundRegistry);
+	Sawtooth(Input<double> frequency, ModuleRegistry& registry = ModuleRegistry::globalRegistry);
 };
 
 MakeModule(Triangle)
@@ -47,10 +45,10 @@ protected:
 	double t = 0;
 
 public:
-	Input in_frequency;
-	TriangleOutput out_output;
+	Input<double> in_frequency;
+	TriangleOutput<double> out_output;
 
-	Triangle(Input frequency, ModuleRegistry& registry = soundRegistry);
+	Triangle(Input<double> frequency, ModuleRegistry& registry = ModuleRegistry::globalRegistry);
 };
 
 MakeModule(Noise)
@@ -61,10 +59,10 @@ private:
 	void SetRandomAmplitude();
 
 public:
-	Input in_frequency;
-	NoiseOutput out_output;
+	Input<double> in_frequency;
+	NoiseOutput<double> out_output;
 
-	Noise(Input frequency, ModuleRegistry& registry = soundRegistry);
+	Noise(Input<double> frequency, ModuleRegistry& registry = ModuleRegistry::globalRegistry);
 };
 
 MakeModule(SquarePulse)
@@ -72,11 +70,11 @@ private:
 	double t = 0;
 
 public:
-	Input in_frequency;
-	Input in_duty;
-	SquarePulseOutput out_output;
+	Input<double> in_frequency;
+	Input<double> in_duty;
+	SquarePulseOutput<double> out_output;
 
-	SquarePulse(Input input, Input duty, ModuleRegistry& registry = soundRegistry);
+	SquarePulse(Input<double> input, Input<double> duty, ModuleRegistry& registry = ModuleRegistry::globalRegistry);
 };
 
 MakeModule(TrianglePulse)
@@ -84,53 +82,53 @@ private:
 	double t = 0;
 
 public:
-	Input in_frequency;
-	Input in_duty;
-	TrianglePulseOutput out_output;
+	Input<double> in_frequency;
+	Input<double> in_duty;
+	TrianglePulseOutput<double> out_output;
 
-	TrianglePulse(Input input, Input duty, ModuleRegistry& registry = soundRegistry);
+	TrianglePulse(Input<double> input, Input<double> duty, ModuleRegistry& registry = ModuleRegistry::globalRegistry);
 };
 
 MakeModule(Constant)
 public:
 	double value = 0;
-	ConstantOutput out_output;
+	ConstantOutput<double> out_output;
 
-	Constant(double value, ModuleRegistry& registry = soundRegistry);
+	Constant(double value, ModuleRegistry& registry = ModuleRegistry::globalRegistry);
 };
 
 MakeModule(Multiplier)
 public:
-	vector<Input> in_sources;
-	MultiplierOutput out_output;
+	vector<Input<double>> in_sources;
+	MultiplierOutput<double> out_output;
 
-	Multiplier(vector<Input> sources, ModuleRegistry& registry = soundRegistry);
+	Multiplier(vector<Input<double>> sources, ModuleRegistry& registry = ModuleRegistry::globalRegistry);
 };
 
 MakeModule(Adder)
 public:
-	vector<Input> in_sources;
-	AdderOutput out_output;
+	vector<Input<double>> in_sources;
+	AdderOutput<double> out_output;
 
-	Adder(vector<Input> sources, ModuleRegistry& registry = soundRegistry);
+	Adder(vector<Input<double>> sources, ModuleRegistry& registry = ModuleRegistry::globalRegistry);
 };
 
 MakeModule(Mapper)
 public:
-	Input in_input;
-	Input in_m;
-	Input in_c;
-	MapperOutput out_output;
+	Input<double> in_input;
+	Input<double> in_m;
+	Input<double> in_c;
+	MapperOutput<double> out_output;
 	// out = m * in + c
-	Mapper(Input input, Input m, Input c, ModuleRegistry& registry = soundRegistry);
+	Mapper(Input<double> input, Input<double> m, Input<double> c, ModuleRegistry& registry = ModuleRegistry::globalRegistry);
 };
 
 MakeModule(Flipper)
 public:
-	Input in_input;
-	FlipperOutput out_output;
+	Input<double> in_input;
+	FlipperOutput<double> out_output;
 
-	Flipper(Input input, ModuleRegistry& registry = soundRegistry);
+	Flipper(Input<double> input, ModuleRegistry& registry = ModuleRegistry::globalRegistry);
 };
 
 MakeModule(Volume)
@@ -138,11 +136,11 @@ protected:
 	double internalVolume;
 
 public:
-	Input in_input;
-	Input in_targetVolume;
-	VolumeOutput out_output;
+	Input<double> in_input;
+	Input<double> in_targetVolume;
+	VolumeOutput<double> out_output;
 
-	Volume(Input input, Input targetVolume, ModuleRegistry& registry = soundRegistry);
+	Volume(Input<double> input, Input<double> targetVolume, ModuleRegistry& registry = ModuleRegistry::globalRegistry);
 };
 
 MakeModule(Limiter)
@@ -150,11 +148,11 @@ protected:
 	double internalVolume;
 
 public:
-	Input in_input;
-	Input in_max;
-	LimiterOutput out_output;
+	Input<double> in_input;
+	Input<double> in_max;
+	LimiterOutput<double> out_output;
 
-	Limiter(Input input, Input max, ModuleRegistry& registry = soundRegistry);
+	Limiter(Input<double> input, Input<double> max, ModuleRegistry& registry = ModuleRegistry::globalRegistry);
 };
 
 MakeModule(Fader)
@@ -164,12 +162,12 @@ protected:
 	bool changing = false;
 
 public:
-	Input in_input;
-	Input in_attackRate;
-	Input in_releaseRate;
-	FaderOutput out_output;
+	Input<double> in_input;
+	Input<double> in_attackRate;
+	Input<double> in_releaseRate;
+	FaderOutput<double> out_output;
 
-	Fader(Input input, Input attack, Input release, ModuleRegistry& registry = soundRegistry);
+	Fader(Input<double> input, Input<double> attack, Input<double> release, ModuleRegistry& registry = ModuleRegistry::globalRegistry);
 
 	void Stop();
 	void Start();
@@ -187,11 +185,11 @@ protected:
 	double lastOutput = 0;
 
 public:
-	Input in_input;
-	Input in_cutoff;
-	LowPassOutput out_output;
+	Input<double> in_input;
+	Input<double> in_cutoff;
+	LowPassOutput<double> out_output;
 
-	LowPass(Input input, Input cutoff, ModuleRegistry& registry = soundRegistry);
+	LowPass(Input<double> input, Input<double> cutoff, ModuleRegistry& registry = ModuleRegistry::globalRegistry);
 
 	void SetCutoff(double cutoff);
 };
@@ -207,11 +205,11 @@ protected:
 	double lastOutput = 0;
 
 public:
-	Input in_input;
-	Input in_cutoff;
-	HighPassOutput out_output;
+	Input<double> in_input;
+	Input<double> in_cutoff;
+	HighPassOutput<double> out_output;
 
-	HighPass(Input input, Input cutoff, ModuleRegistry& registry = soundRegistry);
+	HighPass(Input<double> input, Input<double> cutoff, ModuleRegistry& registry = ModuleRegistry::globalRegistry);
 
 	void SetCutoff(double cutoff);
 };
@@ -226,29 +224,29 @@ protected:
 	void SetLen(int l);
 
 public:
-	Input in_input;
-	Input in_decayRate;
-	Input in_echoDuration;
-	DelayOutput out_output;
+	Input<double> in_input;
+	Input<double> in_decayRate;
+	Input<double> in_echoDuration;
+	DelayOutput<double> out_output;
 
-	Delay(Input input, Input duration, Input decay, ModuleRegistry& registry = soundRegistry);
+	Delay(Input<double> input, Input<double> duration, Input<double> decay, ModuleRegistry& registry = ModuleRegistry::globalRegistry);
 	~Delay();
 };
 
 MakeModule(BitCrusher)
 public:
-	Input in_input;
-	Input in_resolution;
-	BitCrusherOutput out_output;
+	Input<double> in_input;
+	Input<double> in_resolution;
+	BitCrusherOutput<double> out_output;
 
-	BitCrusher(Input input, Input resolution, ModuleRegistry& registry = soundRegistry);
+	BitCrusher(Input<double> input, Input<double> resolution, ModuleRegistry& registry = ModuleRegistry::globalRegistry);
 };
 
 MakeModule(BitCrusher2)
 public:
-	Input in_input;
-	Input in_resolution;
-	BitCrusher2Output out_output;
+	Input<double> in_input;
+	Input<double> in_resolution;
+	BitCrusher2Output<double> out_output;
 
-	BitCrusher2(Input input, Input resolution, ModuleRegistry& registry = soundRegistry);
+	BitCrusher2(Input<double> input, Input<double> resolution, ModuleRegistry& registry = ModuleRegistry::globalRegistry);
 };

@@ -1,31 +1,18 @@
 #pragma once
 
-#include <SDL.h>
+#include "Batcher.h"
 #include <vector>
-#include <algorithm>
-#include <iostream>
+#include <thread>
+#include <queue>
 
 class Module;
 
-class ModuleRegistry {
-private:
-	std::vector<Module*> modules;
+class ModuleRegistry : public BatchRegistry<Module> {
 public:
-	SDL_mutex* lock;
+	void CalculateAllStates();
+	void PresentAllStates();
 
-	ModuleRegistry();
-	~ModuleRegistry();
-	void Register(Module* module);
-	void Unregister(Module* module);
-	void MovePosition(Module* module, size_t position);
-	void CalculateAllModuleStates();
-	void PresentAllModuleStates();
-
-	void RegisterUnsafe(Module* module);
-	void UnregisterUnsafe(Module* module);
-	void MovePositionUnsafe(Module* module, size_t position);
-	void CalculateAllModuleStatesUnsafe();
-	void PresentAllModuleStatesUnsafe();
+	static ModuleRegistry globalRegistry;
 };
 
 class Module {
@@ -33,9 +20,10 @@ class Module {
 protected:
 	virtual void CalculateState() = 0;
 	virtual void PresentState() = 0;
+
 	ModuleRegistry& parent;
+
 public:
-	static SDL_mutex* registryLock;
 	Module(ModuleRegistry& registry);
 	~Module();
 };
@@ -54,11 +42,12 @@ public:
 	operator T() const { return frontValue; } // This is probably a bad idea
 };
 
-typedef Output<double>* Input;
+template <class T>
+using Input = Output<T>*;
 
-#define MakeModuleOutput(name) class name##Output : public Output<double> {\
+#define MakeModuleOutput(name) template<typename T> class name##Output : public Output<T> {\
 	friend class name;\
-	name##Output(double d) : Output<double>(d) {}\
+	name##Output(T d) : Output<T>(d) {}\
 };
 #define MakeModule(name) class name : public Module {\
 MakeModuleOutput(name)\

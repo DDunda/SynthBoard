@@ -1,26 +1,26 @@
 #pragma once
 
-#include <SDL.h>
+#ifndef SLIDER
+#define SLIDER
+
+#include "Input.h"
 #include "InteractiveElement.h"
-#include "AbstractedAccess.h"
+#include "RenderableElement.h"
 #include "Module.h"
 
-class Slider : public Module, public InteractiveElement
+class Slider : public Module, public Interactive, public Renderable
 {
-	class SliderOutput : public Output<double>{
-		friend Slider;
-		SliderOutput(double d) : Output<double>(d) {}
-	};
+	MakeModuleOutput(Slider)
 private:
-	double sliderPercent = 0;
 	double sliderWidth = 100;
 	double knobRadius = 5;
-	bool knobGrabbed = false;
 	int grabOffset = 0;
 	padding pad = {0,0,0,0};
 	double anchorX = 0, anchorY = 0;
-
-	SDL_Rect area = {0,0,0,0};
+	SDL_Rect area = { 0,0,0,0 };
+	bool knobGrabbed = false;
+	double sliderPercent = 0;
+	bool clickAnywhere = true;
 
 	SDL_Colour fillColour { 63,  63,  63,  255 };
 	SDL_Colour boxColour  { 127, 127, 127, 255 };
@@ -30,34 +30,27 @@ private:
 protected:
 	void CalculateState();
 	void PresentState();
+	void Update(double);
+	void Render(SDL_Renderer*);
 
 public:
 	double valueA;
 	double valueB;
 
-	SliderOutput output;
-
-	Slider(double a, double b, ModuleRegistry& registry, double p = 0.5) : Module(registry), valueA(a), valueB(b), sliderPercent(p), output(0.0) {
-		if (sliderPercent > 1) sliderPercent = 1;
-		if (sliderPercent < 0) sliderPercent = 0;
-		output.backValue = a + sliderPercent * (b - a);
-
-		recalculateArea();
-	};
+	SliderOutput<double> out_output;
 
 	void recalculateArea();
 
-	void setPosition(int x, int y);
 	void setAnchor(double aX, double aY);
+	void setPosition(int x, int y);
 	void setPadding(padding pad);
 	void setKnobRadius(int r);
 	void setSliderWidth(int r);
+	void setClickAnywhere(bool c);
 
-	void update(double);
-	void render(SDL_Renderer*);
+	bool InArea(int x, int y) const;
 
-	void unfocus() {};
-	void focus() {};
-
-	bool inArea(int x, int y);
+	Slider(double a, double b, double p = 0.5, ModuleRegistry& mRegistry = ModuleRegistry::globalRegistry, InteractiveRegistry& iRegistry = InteractiveRegistry::globalRegistry, RenderableRegistry& rRegistry = RenderableRegistry::globalRegistry);
 };
+
+#endif

@@ -178,6 +178,7 @@
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="AbstractedAccess.h" />
+    <ClInclude Include="Batcher.h" />
     <ClInclude Include="Filters.h" />
     <ClInclude Include="FloatField.h" />
     <ClInclude Include="Helpers.h" />
