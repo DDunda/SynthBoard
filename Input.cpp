@@ -1,5 +1,3 @@
-#pragma once
-
 #include "Input.h"
 
 extern Uint32 currentTime;

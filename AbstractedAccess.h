@@ -1,6 +1,7 @@
 #pragma once
 
 #include <vector>
+#include <algorithm>
 
 struct ValueContainer {
 	size_t ownerships;
@@ -143,9 +144,6 @@ public:
 		val = v;
 	}
 	T Get() {
-		return *val;
-	}
-	T& Get() {
 		return *val;
 	}
 	void Set(T input) {
