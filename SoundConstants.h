@@ -216,5 +216,5 @@ namespace Octaves {
 
 #undef octave_set
 
-	const Octave* OctaveSet[];
+	extern const Octave* OctaveSet[];
 };

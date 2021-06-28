@@ -1,3 +1,4 @@
+#include <climits>
 #include "IntField.h"
 
 extern Uint32 currentTime;

@@ -15,10 +15,14 @@
 #include "FloatField.h"
 #include "TextField.h"
 #include "SimpleButton.h"
-#include "Slider.h";
+#include "Slider.h"
 #include "Waveform.h"
 
-#define SOUND_BUFFER_SIZE 441
+// Must be a power of 2
+// Larger powers of 2 cause
+// `ALSA lib pcm.c:8545:(snd_pcm_recover) underrun occurred` in Linux
+#define SOUND_BUFFER_SIZE 512
+
 Sint32 soundBuffer[SOUND_BUFFER_SIZE];
 
 void PushAudio(void* userdata, Uint8* stream, int len);
@@ -35,6 +39,7 @@ bool soundRunning = true;
 Input<double> waveOutput;
 SDL_Renderer* renderer = NULL;
 SDL_Window* window = NULL;
+SDL_AudioDeviceID audio_device = 0;
 
 void initialiseSDL() {
 	std::time_t now = std::time(0);
@@ -46,13 +51,16 @@ void initialiseSDL() {
 	}
 
 	SDL_AudioSpec config;
+	SDL_zero(config);
 	config.freq = (int)SOUND_FREQUENCY;
 	config.format = AUDIO_S32;
 	config.channels = 1;
 	config.callback = PushAudio;
 	config.samples = SOUND_BUFFER_SIZE;
 
-	if (SDL_OpenAudio(&config, NULL) < 0) {
+	audio_device = SDL_OpenAudioDevice(NULL, 0, &config, NULL, 0);
+
+	if (audio_device == 0) {
 		fprintf(stderr, "Couldn't open audio: %s\n", SDL_GetError());
 		exit(-1);
 	}
@@ -87,7 +95,7 @@ void SetupVolSlider() {
 }
 
 int main(int argc, char* argv[]) {
-	initialiseSDL();	
+	initialiseSDL();
 
 	num_text = IMG_LoadTexture(renderer, "nums.png");
 	char_text = IMG_LoadTexture(renderer, "chars.png");
@@ -117,7 +125,7 @@ int main(int argc, char* argv[]) {
 
 	waveOutput = &waveform.out_output;
 
-	SDL_PauseAudio(0);
+	SDL_PauseAudioDevice(audio_device, 0);
 
 	lastTime = SDL_GetTicks();
 
@@ -177,7 +185,7 @@ int main(int argc, char* argv[]) {
 	SDL_DestroyRenderer(renderer);
 
 	/// Close resources ///
-	SDL_CloseAudio();
+	SDL_CloseAudioDevice(audio_device);
 	SDL_Quit();
 
 	/// Exit ///
