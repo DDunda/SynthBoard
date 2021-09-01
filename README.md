@@ -1,22 +1,21 @@
 # Synthboard
-Synthboard is real-time digital synthesizer, controlled as a piano from your keyboard and implemented with the SDL-Sound pipeline.
-SDL-Sound is an ongoing project exploring sound with SDL, and ways to play it at runtime.
+Synthboard is digital piano controlled by your keyboard, powered by a modular synthesizer pipeline.
+The basis for this project comes from SDL-Sound, an older project of mine that evolved into Synthboard as I experimented with ways to manipulate my synths in realtime.
 
 ![Synthboard](https://github.com/DDunda/PromotionalMaterials/blob/master/Synthboard.png)
 
 ## How to compile Synthboard
-Synthboard is written as standard C++ Visual Studio project that can be compiled and ran.
-SDL2 and SDL2_image are required for compilation; please follow my guide for installing SDL libraries: https://github.com/DDunda/InstallSDL2
+Synthboard uses a regular C++ Visual Studio project, as well as SDL2 and SDL2_image; for an explanation on how I link my SDL libraries, please see my guide [here](https://github.com/DDunda/InstallSDL2). Once you install both of these libraries you should be fine to press run within your project.
 
 ## How to run Synthboard
-I recommend compiling and running the project from within Visual Studio, as it will start a debug environment that includes many necessary dlls. If you wish to use the actual exe though, you can find the program in the output folder. To run the exe you must copy the dlls from your SDL and SDL_image installations. If you wish to move the exe, the accompanying dlls must be moved as well.
+There are two options for running synthboard; either you can compile and run synthboard inside Visual Studio, or you can compile and run then run the exe. The exe will be in the output folder, but you can move it if you want; just remember to also move the dlls and images!
 
 ## How to use Synthboard
-The controls are quite simple.
-- The piano keys are arranged on your keyboard, in the way a real piano would be.
-  - You can also play the piano with your mouse.
-- The **left and right arrows** move the piano left and right, changing the octave.
-- The **up and down arrows** change the synthesizer between the following:
+The controls are as follows:
+- The piano keys are arranged across the keyboard, in a similar way to a real piano. The white keys are on the QWERTY and ZXCV rows, and the black keys are positioned just above those.
+  - You can use your mouse, too.
+- The **left and right arrows** transpose the piano up or down an octave.
+- The **up and down arrows** cycle between the following synth types:
   - Sine wave
   - Triangle wave
   - Square wave
@@ -25,9 +24,9 @@ The controls are quite simple.
   - Sawtooth wave
   - Whitenoise
 - The first slider controls volume.
-- The second slider lowers the resolution of the sound, an optional effect.
+- The second slider bitcrushes the volume levels of the sound.
 - The third slider controls the decay of the echo effect.
 - The fourth slider controls the delay of the echo effect.
-- The fith slider controls the duty cycle of pulse waves.
+- If you are using a pulse wave, a fith slider will appear that controls the duty cycle.
 
 ![Keyboard layout](https://github.com/DDunda/PromotionalMaterials/blob/master/Layout.png)
