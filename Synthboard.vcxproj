@@ -74,21 +74,29 @@
     <LinkIncremental>true</LinkIncremental>
     <IncludePath>$(SDL)\include\;$(SDL_image)\include\;$(IncludePath)</IncludePath>
     <LibraryPath>$(SDL)\lib\$(PlatformShortName)\;$(SDL_image)\lib\$(PlatformShortName)\;$(LibraryPath)</LibraryPath>
+    <OutDir>$(ProjectDir)out\$(Configuration)_$(PlatformShortName)\</OutDir>
+    <IntDir>$(ProjectDir)tmp\$(Configuration)_$(PlatformShortName)\</IntDir>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">
     <LinkIncremental>true</LinkIncremental>
     <IncludePath>$(SDL)\include\;$(SDL_image)\include\;$(IncludePath)</IncludePath>
     <LibraryPath>$(SDL)\lib\$(PlatformShortName)\;$(SDL_image)\lib\$(PlatformShortName)\;$(LibraryPath)</LibraryPath>
+    <OutDir>$(ProjectDir)out\$(Configuration)_$(PlatformShortName)\</OutDir>
+    <IntDir>$(ProjectDir)tmp\$(Configuration)_$(PlatformShortName)\</IntDir>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">
     <LinkIncremental>false</LinkIncremental>
     <IncludePath>$(SDL)\include\;$(SDL_image)\include\;$(IncludePath)</IncludePath>
     <LibraryPath>$(SDL)\lib\$(PlatformShortName)\;$(SDL_image)\lib\$(PlatformShortName)\;$(LibraryPath)</LibraryPath>
+    <OutDir>$(ProjectDir)out\$(Configuration)_$(PlatformShortName)\</OutDir>
+    <IntDir>$(ProjectDir)tmp\$(Configuration)_$(PlatformShortName)\</IntDir>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|x64'">
     <LinkIncremental>false</LinkIncremental>
     <IncludePath>$(SDL)\include\;$(SDL_image)\include\;$(IncludePath)</IncludePath>
     <LibraryPath>$(SDL)\lib\$(PlatformShortName)\;$(SDL_image)\lib\$(PlatformShortName)\;$(LibraryPath)</LibraryPath>
+    <OutDir>$(ProjectDir)out\$(Configuration)_$(PlatformShortName)\</OutDir>
+    <IntDir>$(ProjectDir)tmp\$(Configuration)_$(PlatformShortName)\</IntDir>
   </PropertyGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">
     <ClCompile>
@@ -100,6 +108,10 @@
       <AdditionalDependencies>SDL2.lib;SDL2main.lib;SDL2_image.lib;%(AdditionalDependencies)</AdditionalDependencies>
       <SubSystem>Console</SubSystem>
     </Link>
+    <PostBuildEvent>
+      <Command>copy "$(SDL)\lib\$(PlatformShortName)\*.dll" "$(OutDir)"
+copy "$(SDL_image)\lib\$(PlatformShortName)\*.dll" "$(OutDir)"</Command>
+    </PostBuildEvent>
   </ItemDefinitionGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">
     <ClCompile>
@@ -111,6 +123,10 @@
       <AdditionalDependencies>SDL2.lib;SDL2main.lib;SDL2_image.lib;%(AdditionalDependencies)</AdditionalDependencies>
       <SubSystem>Console</SubSystem>
     </Link>
+    <PostBuildEvent>
+      <Command>copy "$(SDL)\lib\$(PlatformShortName)\*.dll" "$(OutDir)"
+copy "$(SDL_image)\lib\$(PlatformShortName)\*.dll" "$(OutDir)"</Command>
+    </PostBuildEvent>
   </ItemDefinitionGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">
     <ClCompile>
@@ -127,6 +143,10 @@
       <OptimizeReferences>true</OptimizeReferences>
       <AdditionalDependencies>SDL2.lib;SDL2main.lib;SDL2_image.lib;%(AdditionalDependencies)</AdditionalDependencies>
     </Link>
+    <PostBuildEvent>
+      <Command>copy "$(SDL)\lib\$(PlatformShortName)\*.dll" "$(OutDir)"
+copy "$(SDL_image)\lib\$(PlatformShortName)\*.dll" "$(OutDir)"</Command>
+    </PostBuildEvent>
   </ItemDefinitionGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Release|x64'">
     <ClCompile>
@@ -143,6 +163,10 @@
       <AdditionalDependencies>SDL2.lib;SDL2main.lib;SDL2_image.lib;%(AdditionalDependencies)</AdditionalDependencies>
       <SubSystem>Windows</SubSystem>
     </Link>
+    <PostBuildEvent>
+      <Command>copy "$(SDL)\lib\$(PlatformShortName)\*.dll" "$(OutDir)"
+copy "$(SDL_image)\lib\$(PlatformShortName)\*.dll" "$(OutDir)"</Command>
+    </PostBuildEvent>
   </ItemDefinitionGroup>
   <ItemGroup>
     <ClCompile Include="AbstractedAccess.cpp" />

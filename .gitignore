@@ -1,8 +1,7 @@
-.vs/**
-Debug/**
-Release/**
-x64/**
-*.aps
-
+.vs/
+out/
+tmp/
 bin/
 build/
+
+*.user
